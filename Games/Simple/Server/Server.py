@@ -3,7 +3,7 @@ import time
 import socket
 
 
-class Client:
+class Agent:
     def __init__(self):
         self.number = 0
         self.name = ''
@@ -11,11 +11,12 @@ class Client:
         self.last_action = ''
         self.address = ''
 
+
 class Server(Server):
     def __init__(self):
         self.game_name = 'Simple'
-        self.client_number = 2
-        self.clients = {}
+        self.agent_number = 2
+        self.agents = {}
         self.world = ''
         self.max_step = 100
         self.ip = "127.0.0.1"
@@ -33,18 +34,18 @@ class Server(Server):
             address = msg[1]
             if action.startswith('connect'):
                 action = action.split(',')
-                client = Client()
-                client.name = action[1]
-                client.address = address
-                self.clients[address] = client
-                print('client {} connected'.format(client.name))
-            if len(self.clients) == self.client_number:
+                agent = Agent()
+                agent.name = action[1]
+                agent.address = address
+                self.agents[address] = agent
+                print('agent {} connected'.format(agent.name))
+            if len(self.agents) == self.agent_number:
                 break
             time.sleep(1)
 
     def run_game(self):
         for s in range(self.max_step):
-            for c in range(len(self.clients)):
+            for c in range(len(self.agents)):
                 msg = self.socket.recvfrom(self.msg_size)
                 action = msg[0]
                 address = msg[1]
@@ -58,9 +59,9 @@ class Server(Server):
         address = msg[1]
         if not action.startswith('action'):
             return False
-        if address not in self.clients:
+        if address not in self.agents:
             return False
-        self.clients[address].last_action = action
+        self.agents[address].last_action = action
         return True
 
     def update(self):

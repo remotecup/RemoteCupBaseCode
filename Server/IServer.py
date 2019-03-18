@@ -5,5 +5,5 @@ class IServer:
     def parse(self):
         pass
 
-    def update_game(self):
+    def update(self):
         pass

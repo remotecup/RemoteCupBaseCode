@@ -9,7 +9,6 @@ elif conf.game == 'Snake':
 
 def main():
     g = Game()
-    g.start()
 
 if __name__ == "__main__":
     main()
