@@ -12,7 +12,7 @@ class Agent:
         self.address = ''
 
 
-class Server(Server):
+class Server:
     def __init__(self):
         self.game_name = 'Simple'
         self.agent_number = 2
@@ -20,7 +20,7 @@ class Server(Server):
         self.world = ''
         self.max_step = 100
         self.ip = "127.0.0.1"
-        self.port = "20002"
+        self.port = 20002
         self.socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         self.socket.bind((self.ip, self.port))
         self.msg_size = 1024
@@ -29,15 +29,19 @@ class Server(Server):
 
     def connect(self):
         for i in range(100):
+            print('wait for action')
             msg = self.socket.recvfrom(self.msg_size)
-            action = msg[0]
+            print(msg)
+            action = str(msg[0])
             address = msg[1]
-            if action.startswith('connect'):
+            if action.startswith('connect') and address not in self.agents:
                 action = action.split(',')
                 agent = Agent()
                 agent.name = action[1]
                 agent.address = address
                 self.agents[address] = agent
+                action_resp = str.encode('connected')
+                self.socket.sendto(action_resp, address)
                 print('agent {} connected'.format(agent.name))
             if len(self.agents) == self.agent_number:
                 break
