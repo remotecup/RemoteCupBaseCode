@@ -9,6 +9,9 @@ elif conf.game == 'Snake':
 
 def main():
     g = Game.Server()
+    g.connect()
+    g.run()
+
 
 if __name__ == "__main__":
     main()
