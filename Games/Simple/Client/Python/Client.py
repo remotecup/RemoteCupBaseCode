@@ -13,9 +13,13 @@ print('my id is ' + str(r[0].decode("utf-8")))
 my_id = int(r[0].decode("utf-8"))
 while True:
     r = sock.recvfrom(1024)
-    world = eval(r[0].decode("utf-8"))
-    print(world)
-    print(type(world[0][0]))
+    message = eval(r[0].decode("utf-8"))
+    print('cycle: {}'.format(message['value']['cycle']))
+    world = message['value']['world']
+    for f in world:
+        print(f)
+    print('------------------------------------')
+
     if my_id == 1:
         my_pos = [0, 0]
         for i in range(len(world)):
@@ -37,7 +41,8 @@ while True:
             action = 'l'
     else:
         actions = ['u', 'd', 'l', 'r']
-        action = actions[random.randint(0,3)]
+        action = actions[random.randint(0, 3)]
+    # action = input('enter:')
     a = {'message_type': 'action', 'value': {'name': action}}
     sock.sendto(str.encode(str(a)), server_address)
 

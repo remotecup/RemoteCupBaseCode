@@ -10,6 +10,7 @@ import Games.Simple.Server.Conf as Conf
 
 # {"message_type":"connect", "value":{"name":"value"}
 # {"message_type":"action", "value":{"name":"value"}
+# {"message_type":"resp_action", "value":{"cycle":number, "score":[], "world":""}}
 
 
 def listener(is_run, socket, msg_size, action_queue):
@@ -127,12 +128,12 @@ class Server:
                     continue
                 self.action_parse(msg)
             while self.action_queue.qsize() > 0:
-                msg = self.action_queue.get()
+                self.action_queue.get()
             logging.debug('Receive Action Finished')
             self.update()
 
             self.print_world()
-            time.sleep(1)
+        self.is_run = False
 
     def action_parse(self, msg):
         action = eval(str(msg[0].decode("utf-8")))
@@ -157,10 +158,6 @@ class Server:
             action = self.agents[address].last_action
         self.agents[address].last_action = action
         return True
-
-    def world_to_string(self):
-        world_string = str(self.world)
-        return world_string
 
     def normalize_pos(self, pos):
         if pos.i >= self.max_i:
@@ -193,9 +190,9 @@ class Server:
         self.cycle += 1
 
     def send_world(self):
-        world_string = self.world_to_string()
+        message = {"message_type": "visual", "value": {"cycle": self.cycle, "score": [], "world": self.world}}
         for key in self.agents:
-            self.socket.sendto(str.encode(world_string), key)
+            self.socket.sendto(str.encode(str(message)), key)
 
     def send_id(self):
         for key in self.agents:
