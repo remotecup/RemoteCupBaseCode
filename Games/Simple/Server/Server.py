@@ -13,12 +13,25 @@ import Games.Simple.Server.Conf as Conf
 # {"message_type":"resp_action", "value":{"cycle":number, "score":[], "world":""}}
 
 
-def listener(is_run, socket, msg_size, action_queue):
+is_run = True
+
+
+def listener(socket, msg_size, action_queue):
+    global is_run
     logging.info('Port Listener Started')
     while is_run:
         msg = socket.recvfrom(msg_size)
         action_queue.put(msg)
-        time.sleep(0.01)
+        # time.sleep(0.01)
+
+
+def monitor_listener(socket, msg_size, action_queue):
+    global is_run
+    logging.info('Port Listener Started')
+    while is_run:
+        msg = socket.recvfrom(msg_size)
+        action_queue.put(msg)
+        time.sleep(1)
 
 
 class Vector2D:
@@ -59,6 +72,7 @@ class Server:
         self.game_name = Conf.game_name
         self.agent_numbers = Conf.agent_numbers
         self.agents = {}
+        self.monitors = []
         self.world = []
         self.max_i = Conf.max_i
         self.max_j = Conf.max_j
@@ -66,16 +80,22 @@ class Server:
         self.max_cycle = Conf.max_cycle
         self.think_time = Conf.think_time
         self.cycle = 1
-        self.is_run = True
         self.ip = Conf.ip
-        self.port = Conf.port
+        self.player_port = Conf.player_port
+        self.monitor_port = Conf.monitor_port
         self.socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-        self.socket.bind((self.ip, self.port))
+        self.socket.bind((self.ip, self.player_port))
+        self.monitor_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        self.monitor_socket.bind((self.ip, self.monitor_port))
         self.action_queue = queue.Queue(0)
+        self.monitor_queue = queue.Queue(0)
         self.msg_size = 1024
         self.listener = threading.Thread(target=listener,
-                                         args=(self.is_run, self.socket, self.msg_size, self.action_queue,))
+                                         args=(self.socket, self.msg_size, self.action_queue,))
         self.listener.start()
+        self.monitor_listener = threading.Thread(target=monitor_listener,
+                                         args=(self.monitor_socket, self.msg_size, self.monitor_queue,))
+        self.monitor_listener.start()
 
     def make_world(self):
         logging.info('make new world')
@@ -120,11 +140,13 @@ class Server:
         logging.info('{} agents connected'.format(len(self.agents)))
 
     def run(self):
+        global is_run
         logging.info('Game Started')
         self.make_world()
         self.send_id()
         self.print_world()
         for s in range(self.max_cycle):
+            self.check_monitor_connected()
             self.send_world()
             start_time = time.time()
             while time.time() - start_time < self.think_time:
@@ -140,7 +162,21 @@ class Server:
             self.update()
 
             self.print_world()
-        self.is_run = False
+        is_run = False
+
+    def check_monitor_connected(self):
+        if self.monitor_queue.qsize() > 0:
+            try:
+                port = self.monitor_queue.get(block=True, timeout=0.001)[1]
+                self.monitors.append(port)
+                self.socket.sendto(str.encode(str('connected')), port)
+            except:
+                return
+
+    def send_visual_to_monitors(self):
+        message = {"message_type": "visual", "value": {"cycle": self.cycle, "score": [], "world": self.world}}
+        for monitor in self.monitors:
+            self.socket.sendto(str.encode(str(message)), monitor)
 
     def action_parse(self, msg):
         action = eval(str(msg[0].decode("utf-8")))
