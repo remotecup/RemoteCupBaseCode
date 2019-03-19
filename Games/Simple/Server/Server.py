@@ -29,6 +29,13 @@ class Vector2D:
     def __str__(self):
         return '(' + str(self.i) + ',' + str(self.j) + ')'
 
+    def is_near(self, other):
+        dist = abs(self.i - other.i)
+        dist += abs(self.j - other.j)
+        if dist < 3:
+            return True
+        return False
+
 
 class Agent:
     def __init__(self):
@@ -181,7 +188,16 @@ class Server:
 
             if self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] == self.goal_number:
                 self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] = 0
-                self.world[random.randint(0, self.max_i - 1)][random.randint(0, self.max_j - 1)] = self.goal_number
+                seted_goal = False
+                while not seted_goal:
+                    rand_position = Vector2D(random.randint(0, self.max_i - 1), random.randint(0, self.max_j - 1))
+                    is_near = False
+                    for k in self.agents:
+                        if self.agents[k].pos.is_near(rand_position):
+                            is_near = True
+                    if not is_near:
+                        seted_goal = True
+                self.world[rand_position.i][rand_position.j] = self.goal_number
                 self.agents[key].score += 1
             else:
                 self.world[self.agents[key].pos.i][self.agents[key].pos.j] = 0
