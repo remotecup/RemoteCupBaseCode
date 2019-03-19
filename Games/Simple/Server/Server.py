@@ -6,8 +6,10 @@ import queue
 import logging
 import random
 
+
 # {"message_type":"connect", "value":{"name":"value"}
 # {"message_type":"action", "value":{"name":"value"}
+
 
 def listener(is_run, socket, msg_size, action_queue):
     logging.info('Port Listener Started')
@@ -192,8 +194,8 @@ class Server:
             self.socket.sendto(str.encode(world_string), key)
 
     def print_world(self):
-        logging.debug('cycle:{}'.format(self.cycle))
+        logging.info('cycle:{}'.format(self.cycle))
         for key in self.agents:
-            logging.debug('score {} : {}'.format(self.agents[key].name, str(self.agents[key].score)))
+            logging.info('score {} : {}'.format(self.agents[key].name, str(self.agents[key].score)))
         for c in self.world:
-            logging.debug(str(c))
+            logging.info(str(c))
