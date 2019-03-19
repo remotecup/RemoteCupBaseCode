@@ -5,6 +5,7 @@ import threading
 import queue
 import logging
 import random
+import Games.Simple.Server.Conf as Conf
 
 
 # {"message_type":"connect", "value":{"name":"value"}
@@ -47,36 +48,39 @@ class Agent:
 class Server:
     def __init__(self):
         logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
-        self.game_name = 'Simple'
-        self.agent_number = 2
+        self.game_name = Conf.game_name
+        self.agent_numbers = Conf.agent_numbers
         self.agents = {}
         self.world = []
-        self.max_i = 5
-        self.max_j = 8
-        self.make_world()
-        self.max_cycle = 100
+        self.max_i = Conf.max_i
+        self.max_j = Conf.max_j
+        self.goal_number = self.agent_numbers + 1
+        self.max_cycle = Conf.max_cycle
+        self.think_time = Conf.think_time
         self.cycle = 1
         self.is_run = True
-        self.ip = "127.0.0.1"
-        self.port = 20002
+        self.ip = Conf.ip
+        self.port = Conf.port
         self.socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         self.socket.bind((self.ip, self.port))
         self.action_queue = queue.Queue(0)
         self.msg_size = 1024
-        self.listener = threading.Thread(target=listener, args=(self.is_run, self.socket, self.msg_size, self.action_queue,))
+        self.listener = threading.Thread(target=listener,
+                                         args=(self.is_run, self.socket, self.msg_size, self.action_queue,))
         self.listener.start()
 
     def make_world(self):
         logging.info('make new world')
         self.world = [[0 for x in range(self.max_j)] for x in range(self.max_i)]
-        self.world[0][0] = 1  # agent 1
-        self.world[3][2] = 2  # agent 2
-        for agent in self.agents:
-            if self.agents[agent].number == 1:
-                self.agents[agent].pos = Vector2D(0, 0)
-            elif self.agents[agent].number == 2:
-                self.agents[agent].pos = Vector2D(3, 2)
-        self.world[2][2] = 3  # goal
+        positions = [(i, j) for i in range(self.max_i) for j in range(self.max_j)]
+        random.shuffle(positions)
+        a = 0
+        self.world[positions[a][0]][positions[a][1]] = self.goal_number
+        a += 1
+        for key in self.agents:
+            self.world[positions[a][0]][positions[a][1]] = a
+            self.agents[key].pos = Vector2D(positions[a][0], positions[a][1])
+            a += 1
 
     def connect(self):
         logging.info('Wait for Agents')
@@ -102,7 +106,7 @@ class Server:
                              .format(self.agents[address].name, self.agents[address].address))
             else:
                 logging.error('Client {} Want to Reconnect'.format(address))
-            if len(self.agents) == self.agent_number:
+            if len(self.agents) == self.agent_numbers:
                 break
             time.sleep(1)
         logging.info('{} agents connected'.format(len(self.agents)))
@@ -110,11 +114,12 @@ class Server:
     def run(self):
         logging.info('Game Started')
         self.make_world()
+        self.send_id()
         self.print_world()
         for s in range(self.max_cycle):
             self.send_world()
             start_time = time.time()
-            while time.time() - start_time < 5:
+            while time.time() - start_time < self.think_time:
                 try:
                     msg = self.action_queue.get(block=True, timeout=0.001)
                     logging.debug('Receive {}'.format(msg))
@@ -154,8 +159,7 @@ class Server:
         return True
 
     def world_to_string(self):
-        world_string = [str(v) for t in self.world for v in t]
-        world_string = ','.join(world_string)
+        world_string = str(self.world)
         return world_string
 
     def normalize_pos(self, pos):
@@ -178,9 +182,9 @@ class Server:
             logging.debug('agent {} : {} to {}'
                           .format(self.agents[key].number, self.agents[key].pos, self.agents[key].next_pos))
 
-            if self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] == 3:
+            if self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] == self.goal_number:
                 self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] = 0
-                self.world[random.randint(0, self.max_i - 1)][random.randint(0, self.max_j - 1)] = 3
+                self.world[random.randint(0, self.max_i - 1)][random.randint(0, self.max_j - 1)] = self.goal_number
                 self.agents[key].score += 1
             else:
                 self.world[self.agents[key].pos.i][self.agents[key].pos.j] = 0
@@ -192,6 +196,10 @@ class Server:
         world_string = self.world_to_string()
         for key in self.agents:
             self.socket.sendto(str.encode(world_string), key)
+
+    def send_id(self):
+        for key in self.agents:
+            self.socket.sendto(str.encode(str(self.agents[key].number)), key)
 
     def print_world(self):
         logging.info('cycle:{}'.format(self.cycle))
