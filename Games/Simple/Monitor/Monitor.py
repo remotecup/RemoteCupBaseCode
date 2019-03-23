@@ -1,20 +1,26 @@
 import socket
-import random
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+from Games.Simple.Server.Message import *
 
-server_address = ('localhost', 20003)
 
-a = {'message_type': 'connect_monitor', 'value': {}}
-sock.sendto(str.encode(str(a)), server_address)
-r = sock.recvfrom(1024)
-print(str(r[0].decode("utf-8")))
-r = sock.recvfrom(1024)
-print('my id is ' + str(r[0].decode("utf-8")))
-while True:
-    r = sock.recvfrom(1024)
-    message = eval(r[0].decode("utf-8"))
-    print('cycle: {}'.format(message['value']['cycle']))
-    world = message['value']['world']
-    for f in world:
-        print(f)
-    print('------------------------------------')
+def run():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    server_address = ('localhost', 20003)
+
+    message_snd = MessageMonitorConnectRequest().build()
+    while True:
+        sock.sendto(message_snd, server_address)
+        r = sock.recvfrom(1024)
+        print(r)
+        message_rcv = parse(r[0])
+        if message_rcv.type is 'MessageMonitorConnectResponse':
+            print()
+            break
+    while True:
+        r = sock.recvfrom(1024)
+        message = parse(r[0])
+        print('cycle: {}'.format(message.cycle))
+        world = message.world
+        for f in world:
+            print(f)
+        print('------------------------------------')

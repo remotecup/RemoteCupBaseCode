@@ -6,11 +6,8 @@ import queue
 import logging
 import random
 import Games.Simple.Server.Conf as Conf
-
-
-# {"message_type":"connect", "value":{"name":"value"}
-# {"message_type":"action", "value":{"name":"value"}
-# {"message_type":"resp_action", "value":{"cycle":number, "score":[], "world":""}}
+from Games.Simple.Server.Message import *
+from Games.Simple.Server.Math import *
 
 
 is_run = True
@@ -36,21 +33,6 @@ def monitor_listener(socket, msg_size, action_queue):
             action_queue.put(msg)
         except:
             continue
-
-class Vector2D:
-    def __init__(self, i, j):
-        self.i = i
-        self.j = j
-
-    def __str__(self):
-        return '(' + str(self.i) + ',' + str(self.j) + ')'
-
-    def is_near(self, other):
-        dist = abs(self.i - other.i)
-        dist += abs(self.j - other.j)
-        if dist < 3:
-            return True
-        return False
 
 
 class Agent:
@@ -99,7 +81,7 @@ class Server:
                                          args=(self.socket, self.msg_size, self.action_queue,))
         self.listener.start()
         self.monitor_listener = threading.Thread(target=monitor_listener,
-                                         args=(self.monitor_socket, self.msg_size, self.monitor_queue,))
+                                                 args=(self.monitor_socket, self.msg_size, self.monitor_queue,))
         self.monitor_listener.start()
 
     def make_world(self):
@@ -120,20 +102,22 @@ class Server:
         for i in range(100):
             try:
                 msg_address = self.action_queue.get(block=True, timeout=1)
-                message = eval(str(msg_address[0].decode("utf-8")))
+                message = parse(msg_address[0])
                 address = msg_address[1]
-            except:
-                logging.debug('Did not Receive msg')
+            except Exception as c:
+                logging.debug('Did not Receive msg:{}'.format(c))
                 continue
-            if message['message_type'] is not 'connect':
+
+            if not message.type == 'ClientConnectRequest':
                 logging.error('message_type is not connect')
                 continue
+
             if address not in self.agents:
                 self.agents[address] = Agent()
-                self.agents[address].name = message['value']['name']
+                self.agents[address].name = message.client_name
                 self.agents[address].address = address
                 self.agents[address].number = len(self.agents)
-                action_resp = str.encode('{"message_type":"connected"}')
+                action_resp = MessageClientConnectResponse(self.agents[address].number).build()
                 self.socket.sendto(action_resp, address)
                 logging.info('agent {} connected on port number {}'
                              .format(self.agents[address].name, self.agents[address].address))
@@ -148,7 +132,6 @@ class Server:
         global is_run
         logging.info('Game Started')
         self.make_world()
-        self.send_id()
         self.print_world()
         for s in range(self.max_cycle):
             self.check_monitor_connected()
@@ -173,37 +156,31 @@ class Server:
     def check_monitor_connected(self):
         if self.monitor_queue.qsize() > 0:
             try:
-                port = self.monitor_queue.get(block=True, timeout=0.001)[1]
-                self.monitors.append(port)
-                self.socket.sendto(str.encode(str('connected')), port)
+                msg_address = self.monitor_queue.get(block=True, timeout=0.001)
+                message = parse(msg_address[0])
+                if message.type == 'MessageMonitorConnectRequest':
+                    self.monitors.append(msg_address[1])
+                    self.socket.sendto(MessageMonitorConnectResponse().build(), msg_address[1])
             except:
                 return
 
     def send_visual_to_monitors(self):
-        message = {"message_type": "visual", "value": {"cycle": self.cycle, "score": [], "world": self.world}}
-        for monitor in self.monitors:
-            self.socket.sendto(str.encode(str(message)), monitor)
+        message = MessageClientWorld(self.cycle, self.world).build()
+        for key in self.monitors:
+            self.socket.sendto(message, key)
 
     def action_parse(self, msg):
-        action = eval(str(msg[0].decode("utf-8")))
+        message = parse(msg[0])
         address = msg[1]
-        if action['message_type'] is not 'action':
+        if message.type is not 'MessageClientAction':
             logging.error('message type is not action, client: {}'
                           .format(self.agents.get(address, Agent()).name))
             return False
         if address not in self.agents:
             logging.error('message from invalid address, address: {}'.format(address))
             return False
-        action = action['value']['name']
-        if action is 'u':
-            action = Vector2D(-1, 0)
-        elif action is 'd':
-            action = Vector2D(1, 0)
-        elif action is 'l':
-            action = Vector2D(0, -1)
-        elif action is 'r':
-            action = Vector2D(0, 1)
-        else:
+        action = message.vector_action
+        if action is None:
             action = self.agents[address].last_action
         self.agents[address].last_action = action
         return True
@@ -248,13 +225,9 @@ class Server:
         self.cycle += 1
 
     def send_world(self):
-        message = {"message_type": "visual", "value": {"cycle": self.cycle, "score": [], "world": self.world}}
+        message = MessageClientWorld(self.cycle, self.world).build()
         for key in self.agents:
-            self.socket.sendto(str.encode(str(message)), key)
-
-    def send_id(self):
-        for key in self.agents:
-            self.socket.sendto(str.encode(str(self.agents[key].number)), key)
+            self.socket.sendto(message, key)
 
     def print_world(self):
         logging.info('cycle:{}'.format(self.cycle))
