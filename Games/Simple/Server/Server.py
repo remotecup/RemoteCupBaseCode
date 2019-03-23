@@ -20,19 +20,22 @@ def listener(socket, msg_size, action_queue):
     global is_run
     logging.info('Port Listener Started')
     while is_run:
-        msg = socket.recvfrom(msg_size)
-        action_queue.put(msg)
-        # time.sleep(0.01)
+        try:
+            msg = socket.recvfrom(msg_size)
+            action_queue.put(msg)
+        except:
+            continue
 
 
 def monitor_listener(socket, msg_size, action_queue):
     global is_run
     logging.info('Port Listener Started')
     while is_run:
-        msg = socket.recvfrom(msg_size)
-        action_queue.put(msg)
-        time.sleep(1)
-
+        try:
+            msg = socket.recvfrom(msg_size)
+            action_queue.put(msg)
+        except:
+            continue
 
 class Vector2D:
     def __init__(self, i, j):
@@ -84,8 +87,10 @@ class Server:
         self.player_port = Conf.player_port
         self.monitor_port = Conf.monitor_port
         self.socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        self.socket.settimeout(1)
         self.socket.bind((self.ip, self.player_port))
         self.monitor_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        self.monitor_socket.settimeout(1)
         self.monitor_socket.bind((self.ip, self.monitor_port))
         self.action_queue = queue.Queue(0)
         self.monitor_queue = queue.Queue(0)
@@ -148,6 +153,7 @@ class Server:
         for s in range(self.max_cycle):
             self.check_monitor_connected()
             self.send_world()
+            self.send_visual_to_monitors()
             start_time = time.time()
             while time.time() - start_time < self.think_time:
                 try:
