@@ -7,4 +7,6 @@ def get_action(world):
         action = 'r'
     elif world.goal_position.j < world.self_position.j:
         action = 'l'
+    else:
+        action = 'd'
     return action
