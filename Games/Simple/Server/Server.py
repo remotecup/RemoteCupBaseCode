@@ -100,6 +100,7 @@ class Server:
     def connect(self):
         logging.info('Wait for Agents')
         for i in range(100):
+            self.check_monitor_connected()
             try:
                 msg_address = self.action_queue.get(block=True, timeout=1)
                 message = parse(msg_address[0])
