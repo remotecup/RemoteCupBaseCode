@@ -1,4 +1,5 @@
 import socket
+from argparse import ArgumentParser
 from Games.Simple.Server.Message import *
 from Games.Simple.Client.Python.World import *
 import Games.Simple.Client.Python.ClientGreedy as c_greedy
@@ -6,11 +7,17 @@ import Games.Simple.Client.Python.ClientRandom as c_random
 
 
 def run():
+    parser = ArgumentParser()
+    parser.add_argument("-n", "--name", dest="name", type=str, default='team_name',
+                        help="Client Name", metavar="NAME")
+    parser.add_argument("-c", "--client", dest="client_type", type=str, default='auto',
+                        help="greedy, random, hand, auto", metavar="ClientType")
+    args = parser.parse_args()
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(1)
     server_address = ('localhost', 20002)
     world = World()
-    message_snd = MessageClientConnectRequest(input('enter name:')).build()
+    message_snd = MessageClientConnectRequest(args.name).build()
 
     while True:
         sock.sendto(message_snd, server_address)
@@ -36,11 +43,12 @@ def run():
             world.update(message)
             world.print()
 
-            if world.self_id == 1:
+            if args.client_type == 'greedy' or (args.client_type == 'auto' and world.self_id == 1):
                 action = c_greedy.get_action(world)
-            else:
+            elif args.client_type == 'random' or (args.client_type == 'auto' and world.self_id == 2):
                 action = c_random.get_action(world)
-            # action = input('enter:')
+            elif args.client_type == 'hand':
+                action = input('enter action (u or d or l or r:')
 
             sock.sendto(MessageClientAction(string_action=action).build(), server_address)
 
