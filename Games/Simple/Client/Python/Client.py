@@ -1,4 +1,5 @@
 import socket
+import random
 from argparse import ArgumentParser
 from Games.Simple.Server.Message import *
 from Games.Simple.Client.Python.World import *
@@ -8,7 +9,7 @@ import Games.Simple.Client.Python.ClientRandom as c_random
 
 def run():
     parser = ArgumentParser()
-    parser.add_argument("-n", "--name", dest="name", type=str, default='team_name',
+    parser.add_argument("-n", "--name", dest="name", type=str, default='team_name' + str(random.randint(0, 10000)),
                         help="Client Name", metavar="NAME")
     parser.add_argument("-c", "--client", dest="client_type", type=str, default='auto',
                         help="greedy, random, hand, auto", metavar="ClientType")
@@ -28,7 +29,7 @@ def run():
         message = parse(message_rcv[0])
         if message.type == 'MessageClientConnectResponse':
             print('my id is ' + str(message.id))
-            world.set_id(message.id, 3)
+            world.set_id(message.id, message.goal_id)
             break
 
     while True:

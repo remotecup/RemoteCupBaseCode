@@ -59,7 +59,7 @@ class Server:
         self.agents = {}
         self.monitors = []
         self.world = []
-        self.goal_number = Conf.agent_numbers + 1
+        self.goal_id = Conf.agent_numbers + 1
         self.cycle = 1
         self.player_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         self.player_socket.settimeout(1)
@@ -151,7 +151,7 @@ class Server:
             logging.debug('agent {} : {} to {}'
                           .format(self.agents[key].number, self.agents[key].pos, self.agents[key].next_pos))
 
-            if self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] == self.goal_number:
+            if self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] == self.goal_id:
                 self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] = 0
                 seted_goal = False
                 while not seted_goal:
@@ -162,7 +162,7 @@ class Server:
                             is_near = True
                     if not is_near:
                         seted_goal = True
-                self.world[rand_position.i][rand_position.j] = self.goal_number
+                self.world[rand_position.i][rand_position.j] = self.goal_id
                 self.agents[key].score += 1
             else:
                 self.world[self.agents[key].pos.i][self.agents[key].pos.j] = 0
@@ -176,7 +176,7 @@ class Server:
         positions = [(i, j) for i in range(Conf.max_i) for j in range(Conf.max_j)]
         random.shuffle(positions)
         a = 0
-        self.world[positions[a][0]][positions[a][1]] = self.goal_number
+        self.world[positions[a][0]][positions[a][1]] = self.goal_id
         a += 1
         for key in self.agents:
             self.world[positions[a][0]][positions[a][1]] = a
@@ -189,7 +189,7 @@ class Server:
             self.agents[address].name = message.client_name
             self.agents[address].address = address
             self.agents[address].number = len(self.agents)
-            action_resp = MessageClientConnectResponse(self.agents[address].number).build()
+            action_resp = MessageClientConnectResponse(self.agents[address].number, self.goal_id).build()
             self.player_socket.sendto(action_resp, address)
             logging.info('agent {} connected on port number {}'
                          .format(self.agents[address].name, self.agents[address].address))
@@ -203,7 +203,7 @@ class Server:
                 message = parse(msg_address[0])
                 if message.type == 'MessageMonitorConnectRequest':
                     self.monitors.append(msg_address[1])
-                    self.player_socket.sendto(MessageMonitorConnectResponse().build(), msg_address[1])
+                    self.player_socket.sendto(MessageMonitorConnectResponse(self.goal_id).build(), msg_address[1])
                     self.start = True
             except:
                 return

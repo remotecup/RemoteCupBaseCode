@@ -34,12 +34,13 @@ class MessageClientConnectRequest(Message):
 
 
 class MessageClientConnectResponse(Message):
-    def __init__(self, id):
+    def __init__(self, id, goal_id):
         self.type = "MessageClientConnectResponse"
         self.id = id
+        self.goal_id = goal_id
 
     def build(self):
-        msg = {"message_type": self.type, "value": {"id": self.id}}
+        msg = {"message_type": self.type, "value": {"id": self.id, "goal_id": self.goal_id}}
         str_msg = str.encode(str(msg))
         return str_msg
 
@@ -47,7 +48,7 @@ class MessageClientConnectResponse(Message):
     def parse(coded_msg):
         msg = eval(str(coded_msg.decode("utf-8")))
         if msg['message_type'] == "MessageClientConnectResponse":
-            message = MessageClientConnectResponse(msg['value']['id'])
+            message = MessageClientConnectResponse(msg['value']['id'], msg['value']['goal_id'])
             return True, message
         return False, None
 
@@ -89,11 +90,12 @@ class MessageMonitorConnectRequest(Message):
 
 
 class MessageMonitorConnectResponse(Message):
-    def __init__(self):
+    def __init__(self, goal_id):
         self.type = "MessageMonitorConnectResponse"
+        self.goal_id = goal_id
 
     def build(self):
-        msg = {"message_type": self.type, "value": {}}
+        msg = {"message_type": self.type, "value": {'goal_id': self.goal_id}}
         str_msg = str.encode(str(msg))
         return str_msg
 
@@ -101,7 +103,7 @@ class MessageMonitorConnectResponse(Message):
     def parse(coded_msg):
         msg = eval(str(coded_msg.decode("utf-8")))
         if msg['message_type'] == "MessageMonitorConnectResponse":
-            message = MessageMonitorConnectResponse()
+            message = MessageMonitorConnectResponse(msg['value']['goal_id'])
             return True, message
         return False, None
 
