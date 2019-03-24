@@ -52,6 +52,24 @@ class MessageClientConnectResponse(Message):
         return False, None
 
 
+class MessageClientDisconnect(Message):
+    def __init__(self):
+        self.type = "MessageClientDisconnect"
+
+    def build(self):
+        msg = {"message_type": self.type, "value": {}}
+        str_msg = str.encode(str(msg))
+        return str_msg
+
+    @staticmethod
+    def parse(coded_msg):
+        msg = eval(str(coded_msg.decode("utf-8")))
+        if msg['message_type'] == "MessageClientDisconnect":
+            message = MessageClientDisconnect()
+            return True, message
+        return False, None
+
+
 class MessageMonitorConnectRequest(Message):
     def __init__(self):
         self.type = "MessageMonitorConnectRequest"
@@ -89,13 +107,14 @@ class MessageMonitorConnectResponse(Message):
 
 
 class MessageClientWorld(Message):
-    def __init__(self, cycle, world):
+    def __init__(self, cycle, board, score):
         self.type = "MessageClientWorld"
         self.cycle = cycle
-        self.world = world
+        self.board = board
+        self.score = score
 
     def build(self):
-        msg = {"message_type": self.type, "value": {"cycle": self.cycle, "score": [], "world": self.world}}
+        msg = {"message_type": self.type, "value": {"cycle": self.cycle, "score": self.score, "board": self.board}}
         str_msg = str.encode(str(msg))
         return str_msg
 
@@ -104,8 +123,9 @@ class MessageClientWorld(Message):
         msg = eval(str(coded_msg.decode("utf-8")))
         if msg['message_type'] == "MessageClientWorld":
             cycle = msg['value']['cycle']
-            world = msg['value']['world']
-            message = MessageClientWorld(cycle, world)
+            world = msg['value']['board']
+            score = msg['value']['score']
+            message = MessageClientWorld(cycle, world, score)
             return True, message
         return False, None
 
@@ -147,6 +167,10 @@ def parse(coded_msg):
         return ret[1]
 
     ret = MessageClientConnectResponse.parse(coded_msg)
+    if ret[0]:
+        return ret[1]
+
+    ret = MessageClientDisconnect.parse(coded_msg)
     if ret[0]:
         return ret[1]
 

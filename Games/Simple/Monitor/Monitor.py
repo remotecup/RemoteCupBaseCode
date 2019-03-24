@@ -11,16 +11,17 @@ def run():
     while True:
         sock.sendto(message_snd, server_address)
         r = sock.recvfrom(1024)
-        print(r)
         message_rcv = parse(r[0])
         if message_rcv.type is 'MessageMonitorConnectResponse':
-            print()
             break
     while True:
         r = sock.recvfrom(1024)
         message = parse(r[0])
+        if message.type == 'MessageClientDisconnect':
+            break
         print('cycle: {}'.format(message.cycle))
-        world = message.world
-        for f in world:
+        print('score: {}'.format(str(message.score)))
+        board = message.board
+        for f in board:
             print(f)
         print('------------------------------------')

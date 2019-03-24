@@ -152,6 +152,7 @@ class Server:
             self.update()
 
             self.print_world()
+        self.send_disconnected()
         is_run = False
 
     def check_monitor_connected(self):
@@ -166,7 +167,8 @@ class Server:
                 return
 
     def send_visual_to_monitors(self):
-        message = MessageClientWorld(self.cycle, self.world).build()
+        score = dict([(self.agents[key].name, self.agents[key].score) for key in self.agents])
+        message = MessageClientWorld(self.cycle, self.world, score).build()
         for key in self.monitors:
             self.socket.sendto(message, key)
 
@@ -226,8 +228,16 @@ class Server:
         self.cycle += 1
 
     def send_world(self):
-        message = MessageClientWorld(self.cycle, self.world).build()
+        score = dict([(self.agents[key].name, self.agents[key].score) for key in self.agents])
+        message = MessageClientWorld(self.cycle, self.world, score).build()
         for key in self.agents:
+            self.socket.sendto(message, key)
+
+    def send_disconnected(self):
+        message = MessageClientDisconnect().build()
+        for key in self.agents:
+            self.socket.sendto(message, key)
+        for key in self.monitors:
             self.socket.sendto(message, key)
 
     def print_world(self):
