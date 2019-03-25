@@ -9,3 +9,5 @@ monitor_port    = 20003
 think_time      = 0.1
 auto_mode       = True
 sync_mode       = True
+rcg_logger      = True
+rcl_logger      = True

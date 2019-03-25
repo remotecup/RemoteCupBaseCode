@@ -4,13 +4,17 @@ import socket
 import threading
 import queue
 import logging
+import datetime
 import random
 import Games.Simple.Server.Conf as Conf
 from Games.Simple.Server.Message import *
 from Games.Simple.Server.Math import *
-
+from Games.Simple.Server.Logger import *
 
 is_run = True
+log_file_name = datetime.datetime.now().strftime('{}-%Y-%m-%d-%H-%M-%S'.format(Conf.game_name))
+rcg_logger = setup_logger('rcg_logger', log_file_name + '.rcg')
+rcl_logger = setup_logger('rcl_logger', log_file_name + '.rcl')
 
 
 def listener(socket, msg_size, action_queue):
@@ -37,7 +41,7 @@ def monitor_listener(socket, msg_size, action_queue):
 
 class Agent:
     def __init__(self):
-        self.number = 0
+        self.id = 0
         self.name = ''
         self.score = 0
         self.last_action = Vector2D(0, 0)
@@ -112,6 +116,7 @@ class Server:
     def run(self):
         global is_run
         logging.info('Game Started')
+        self.save_rcg_header()
         start_time = time.time()
         self.make_world()
         self.print_world()
@@ -149,7 +154,7 @@ class Server:
             self.agents[key].update_next_pos()
             self.agents[key].next_pos = self.normalize_pos(self.agents[key].next_pos)
             logging.debug('agent {} : {} to {}'
-                          .format(self.agents[key].number, self.agents[key].pos, self.agents[key].next_pos))
+                          .format(self.agents[key].id, self.agents[key].pos, self.agents[key].next_pos))
 
             if self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] == self.goal_id:
                 self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] = 0
@@ -167,8 +172,9 @@ class Server:
             else:
                 self.world[self.agents[key].pos.i][self.agents[key].pos.j] = 0
             self.agents[key].pos = self.agents[key].next_pos
-            self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] = self.agents[key].number
+            self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] = self.agents[key].id
         self.cycle += 1
+        self.save_rcg_cycle()
 
     def make_world(self):
         logging.info('make new world')
@@ -188,8 +194,8 @@ class Server:
             self.agents[address] = Agent()
             self.agents[address].name = message.client_name
             self.agents[address].address = address
-            self.agents[address].number = len(self.agents)
-            action_resp = MessageClientConnectResponse(self.agents[address].number, self.goal_id).build()
+            self.agents[address].id = len(self.agents)
+            action_resp = MessageClientConnectResponse(self.agents[address].id, self.goal_id).build()
             self.player_socket.sendto(action_resp, address)
             logging.info('agent {} connected on port number {}'
                          .format(self.agents[address].name, self.agents[address].address))
@@ -219,6 +225,7 @@ class Server:
             logging.error('message from invalid address, address: {}'.format(address))
             return False
         action = message.vector_action
+        self.save_rcl(self.agents[address].id, message.string_message, message.vector_action)
         if action is None:
             action = self.agents[address].last_action
         self.agents[address].last_action = action
@@ -256,6 +263,27 @@ class Server:
             self.player_socket.sendto(message, key)
         for key in self.monitors:
             self.player_socket.sendto(message, key)
+
+    def save_rcg_header(self):
+        if not Conf.rcg_logger:
+            return
+        teams = []
+        for key in self.agents:
+            team = {'name': self.agents[key].name, 'id': self.agents[key].id}
+            teams.append(team)
+        message = MessageRCGHeader(teams).build()
+        rcg_logger.info(message)
+
+    def save_rcg_cycle(self):
+        if not Conf.rcg_logger:
+            return
+        score = dict([(self.agents[key].name, self.agents[key].score) for key in self.agents])
+        rcg_logger.info('{}'.format(MessageRCGCycle(self.cycle, self.world, score).build()))
+
+    def save_rcl(self, id, string_message, vector_action):
+        if not Conf.rcl_logger:
+            return
+        rcl_logger.info('cycle:{} id:{} message:{} action:{}'.format(self.cycle, id, string_message, vector_action))
 
     def print_world(self):
         logging.info('cycle:{}'.format(self.cycle))

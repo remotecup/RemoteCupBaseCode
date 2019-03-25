@@ -133,10 +133,11 @@ class MessageClientWorld(Message):
 
 
 class MessageClientAction(Message):
-    def __init__(self, vector_action=Vector2D(0, 0), string_action=''):
+    def __init__(self, vector_action=Vector2D(0, 0), string_action='', string_message = ''):
         self.type = "MessageClientAction"
         self.vector_action = vector_action
         self.string_action = string_action
+        self.string_message = string_message
 
     def build(self):
         msg = {"message_type": self.type, "value": {"action": self.string_action}}
@@ -158,7 +159,53 @@ class MessageClientAction(Message):
                 action = Vector2D(0, 1)
             else:
                 action = None
-            message = MessageClientAction(vector_action=action)
+            message = MessageClientAction(vector_action=action, string_message=str(coded_msg.decode("utf-8")))
+            return True, message
+        return False, None
+
+
+class MessageRCGHeader(Message):
+    def __init__(self, teams):
+        self.type = "MessageRCGHeader"
+        self.teams = teams
+
+    def build(self):
+        msg = {"message_type": self.type, "value": {"teams": self.teams}}
+        str_msg = str.encode(str(msg))
+        str_msg = str(msg)
+        return str_msg
+
+    @staticmethod
+    def parse(coded_msg):
+        # msg = eval(str(coded_msg.decode("utf-8")))
+        msg = eval(coded_msg)
+        if msg['message_type'] == "MessageRCGHeader":
+            teams = msg['value']['teams']
+            message = MessageRCGHeader(teams)
+            return True, message
+        return False, None
+
+
+class MessageRCGCycle(Message):
+    def __init__(self, cycle, board, score):
+        self.type = "MessageRCGCycle"
+        self.cycle = cycle
+        self.board = board
+        self.score = score
+
+    def build(self):
+        msg = {"message_type": self.type, "value": {"cycle": self.cycle, "score": self.score, "board": self.board}}
+        str_msg = str(msg)
+        return str_msg
+
+    @staticmethod
+    def parse(coded_msg):
+        msg = eval(coded_msg)
+        if msg['message_type'] == "MessageRCGCycle":
+            cycle = msg['value']['cycle']
+            world = msg['value']['board']
+            score = msg['value']['score']
+            message = MessageRCGCycle(cycle, world, score)
             return True, message
         return False, None
 
@@ -189,6 +236,14 @@ def parse(coded_msg):
         return ret[1]
 
     ret = MessageClientWorld.parse(coded_msg)
+    if ret[0]:
+        return ret[1]
+
+    ret = MessageRCGHeader.parse(coded_msg)
+    if ret[0]:
+        return ret[1]
+
+    ret = MessageRCGCycle.parse(coded_msg)
     if ret[0]:
         return ret[1]
 
