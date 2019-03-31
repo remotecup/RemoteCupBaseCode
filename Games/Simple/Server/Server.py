@@ -208,7 +208,8 @@ class Server:
                 msg_address = self.monitor_queue.get(block=True, timeout=0.001)
                 message = parse(msg_address[0])
                 if message.type == 'MessageMonitorConnectRequest':
-                    self.monitors.append(msg_address[1])
+                    if msg_address[1] not in self.monitors:
+                        self.monitors.append(msg_address[1])
                     self.player_socket.sendto(MessageMonitorConnectResponse(self.goal_id).build(), msg_address[1])
                     self.start = True
             except:
