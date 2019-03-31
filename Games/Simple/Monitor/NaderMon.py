@@ -43,7 +43,7 @@ class CMenu:
         filemenu.add_command(label="Disconnect", command=self.disconnect)
         filemenu.add_command(label="Open...", command=self.onOpen)
         filemenu.add_separator()
-        filemenu.add_command(label="Exit", command=self.menu_call)
+        filemenu.add_command(label="Exit", command=self.main.close_window)
         helpmenu = Menu(menu)
         menu.add_cascade(label="Help", menu=helpmenu)
         helpmenu.add_command(label="About...", command=self.menu_call)
