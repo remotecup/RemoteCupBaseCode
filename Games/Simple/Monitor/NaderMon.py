@@ -39,9 +39,9 @@ class CMenu:
         main.root.config(menu=menu)
         filemenu = Menu(menu)
         menu.add_cascade(label="File", menu=filemenu)
+        filemenu.add_command(label="Open...", command=self.onOpen)
         filemenu.add_command(label="Connect", command=self.send_connect_request)
         filemenu.add_command(label="Disconnect", command=self.disconnect)
-        filemenu.add_command(label="Open...", command=self.onOpen)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=self.main.close_window)
         helpmenu = Menu(menu)
@@ -49,11 +49,14 @@ class CMenu:
         helpmenu.add_command(label="About...", command=self.menu_call)
 
     def onOpen(self):
+        global is_connected
         filename = filedialog.askopenfilename(initialdir="~", title="Select file",
                                               filetypes=(("jpeg files", "*.rcg"), ("all files", "*.*")))
         try:
             f = open(filename, 'r')
             lines = f.readlines()
+            is_connected = False
+            self.main.gui.reset_show()
             visual_list.clear()
             for l in lines:
                 message = parse(l)
@@ -81,18 +84,21 @@ class CMenu:
         visual_list.clear()
         print('want connect')
 
-        self.main.toolbar.reset_time()
+        # self.main.toolbar.reset_time()
         message_snd = MessageMonitorConnectRequest().build()
-
         print('send req')
         sock.sendto(message_snd, server_address)
-        r = sock.recvfrom(1024)
-        message_rcv = parse(r[0])
-        if message_rcv.type is 'MessageMonitorConnectResponse':
-            print('receive resp')
-            th = threading.Thread(target=push_online)
-
-            th.start()
+        while True:
+            r = sock.recvfrom(1024)
+            message_rcv = parse(r[0])
+            print(message_rcv)
+            if message_rcv.type is 'MessageMonitorConnectResponse':
+                print('receive resp')
+                th = threading.Thread(target=push_online)
+                th.start()
+                break
+            else:
+                continue
 
     def disconnect(self):
         global is_connected
