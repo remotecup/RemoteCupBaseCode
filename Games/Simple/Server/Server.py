@@ -10,8 +10,21 @@ import Games.Simple.Server.Conf as Conf
 from Games.Simple.Server.Message import *
 from Games.Simple.Server.Math import *
 from Games.Simple.Server.Logger import *
+import signal
+
 
 is_run = True
+
+
+def signal_handler(sig, frame):
+    global is_run
+    print('You pressed Ctrl+C!')
+    is_run = False
+
+
+signal.signal(signal.SIGINT, signal_handler)
+
+
 log_file_name = datetime.datetime.now().strftime('{}-%Y-%m-%d-%H-%M-%S'.format(Conf.game_name))
 rcg_logger = setup_logger('rcg_logger', log_file_name + '.rcg')
 rcl_logger = setup_logger('rcl_logger', log_file_name + '.rcl')
@@ -86,6 +99,8 @@ class Server:
     def connect(self):
         logging.info('Wait for Agents')
         for i in range(100):
+            if not is_run:
+                return
             self.check_monitor_connected()
             try:
                 msg_address = self.action_queue.get(block=True, timeout=1)
@@ -113,14 +128,21 @@ class Server:
 
         logging.info('{} agents connected'.format(len(self.agents)))
 
+    def disconnect(self):
+        self.send_disconnected()
+
     def run(self):
         global is_run
+        if not is_run:
+            return
         logging.info('Game Started')
         self.save_rcg_header()
         start_time = time.time()
         self.make_world()
         self.print_world()
         for s in range(Conf.max_cycle):
+            if not is_run:
+                return
             self.check_monitor_connected()
             self.send_world()
             self.send_visual_to_monitors()

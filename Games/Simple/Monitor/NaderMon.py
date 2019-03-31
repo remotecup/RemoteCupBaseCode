@@ -10,6 +10,7 @@ from tkinter import messagebox
 
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.settimeout(1)
 server_address = ('localhost', 20003)
 visual_queue = queue.Queue(0)
 visual_list = []
@@ -21,7 +22,10 @@ def push_online():
     global is_connected
     print('push online')
     while is_connected:
-        r = sock.recvfrom(1024)
+        try:
+            r = sock.recvfrom(1024)
+        except:
+            continue
         message = parse(r[0])
         if message.type == 'MessageClientDisconnect':
             is_connected = False
@@ -88,8 +92,15 @@ class CMenu:
         message_snd = MessageMonitorConnectRequest().build()
         print('send req')
         sock.sendto(message_snd, server_address)
-        while True:
-            r = sock.recvfrom(1024)
+        try_number = 0
+        while is_run:
+            try:
+                r = sock.recvfrom(1024)
+            except:
+                try_number += 1
+                if try_number > 4:
+                    break
+                continue
             message_rcv = parse(r[0])
             print(message_rcv)
             if message_rcv.type is 'MessageMonitorConnectResponse':
@@ -253,6 +264,8 @@ class MainWindow:
         self.root.resizable(False, False)
         self.root.protocol("WM_DELETE_WINDOW", self.close_window)
         self.root.title('Monitor')
+        img = PhotoImage(file='icons/icon.png')
+        self.root.tk.call('wm', 'iconphoto', self.root._w, img)
         self.root.geometry('500x500')
         self.root.pack_propagate(0)
 
