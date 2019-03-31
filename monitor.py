@@ -2,7 +2,7 @@ import conf
 
 
 if conf.game == 'Simple':
-    import Games.Simple.Monitor.Monitor as Monitor
+    import Games.Simple.Monitor.NaderMon as Monitor
 elif conf.game == 'Snake':
     import Games.Snake.Monitor.Monitor as Monitor
 
