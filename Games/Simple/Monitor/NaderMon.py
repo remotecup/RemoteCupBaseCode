@@ -43,12 +43,16 @@ class CMenu:
     def onOpen(self):
         filename = filedialog.askopenfilename(initialdir="~", title="Select file",
                                                    filetypes=(("jpeg files", "*.rcg"), ("all files", "*.*")))
-        f = open(filename, 'r')
-        lines = f.readlines()
-        for l in lines:
-            message = parse(l)
-            if message.type == 'MessageRCGCycle':
-                visual_list.append(message)
+        try:
+            f = open(filename, 'r')
+            lines = f.readlines()
+            visual_list.clear()
+            for l in lines:
+                message = parse(l)
+                if message.type == 'MessageRCGCycle':
+                    visual_list.append(message)
+        except:
+            pass
 
     def readFile(self, filename):
 
