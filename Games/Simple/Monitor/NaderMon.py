@@ -263,6 +263,8 @@ class MainWindow:
         self.root = Tk()
         self.root.resizable(False, False)
         self.root.protocol("WM_DELETE_WINDOW", self.close_window)
+        self.root.bind('<Left>', self.left_key)
+        self.root.bind('<Right>', self.right_key)
         self.root.title('Monitor')
         img = PhotoImage(file='icons/icon.png')
         self.root.tk.call('wm', 'iconphoto', self.root._w, img)
@@ -294,6 +296,19 @@ class MainWindow:
         print('{} close windows'.format(threading.current_thread().ident))
         print('close')
 
+    def right_key(self, event):
+        self.gui.show_cycle += 1
+        if self.gui.show_cycle >= len(visual_list):
+            self.gui.show_cycle = len(visual_list) - 1
+        self.toolbar.timer_scale.set(self.gui.show_cycle)
+        self.gui.pause()
+
+    def left_key(self, event):
+        self.gui.show_cycle -= 1
+        if self.gui.show_cycle < 0:
+            self.gui.show_cycle = 0
+        self.toolbar.timer_scale.set(self.gui.show_cycle)
+        self.gui.pause()
 
 class Gui:
     def __init__(self):
