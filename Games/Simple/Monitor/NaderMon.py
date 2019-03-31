@@ -168,6 +168,7 @@ class CToolbar:
         self.timer_show_label.place(x=0, y=0)
 
     def mouse_click(self, event):
+        self.main.gui.pause()
         self.scale_mouse_click = True
 
     def mouse_leave(self, event):
@@ -301,9 +302,10 @@ class Gui:
         print('show started')
         while is_run:
             print('{} {}'.format(self.show_cycle, len(visual_list)))
-            self.main_window.toolbar.timer_min.set(0 if len(visual_list) == 0 else visual_list[0].cycle)
-            self.main_window.toolbar.timer_max.set(len(visual_list) + int(self.main_window.toolbar.timer_min.get()))
-            self.main_window.toolbar.timer_show.set(self.show_cycle + int(self.main_window.toolbar.timer_min.get()))
+            tmp = 0 if len(visual_list) == 0 else visual_list[0].cycle
+            self.main_window.toolbar.timer_min.set(tmp)
+            self.main_window.toolbar.timer_max.set(len(visual_list) + tmp)
+            self.main_window.toolbar.timer_show.set(self.show_cycle + tmp)
             self.main_window.toolbar.timer_scale['to'] = len(visual_list)
 
             if self.show_cycle < len(visual_list):
