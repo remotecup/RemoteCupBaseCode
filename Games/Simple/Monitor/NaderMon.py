@@ -5,7 +5,7 @@ import Games.Simple.Server.Conf as Conf
 import threading
 import time
 import queue
-
+from tkinter import filedialog
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server_address = ('localhost', 20003)
@@ -33,12 +33,28 @@ class CMenu:
         menu.add_cascade(label="File", menu=filemenu)
         filemenu.add_command(label="Connect", command=self.send_connect_request)
         filemenu.add_command(label="Disconnect", command=self.menu_call)
-        filemenu.add_command(label="Open...", command=self.menu_call)
+        filemenu.add_command(label="Open...", command=self.onOpen)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=self.menu_call)
         helpmenu = Menu(menu)
         menu.add_cascade(label="Help", menu=helpmenu)
         helpmenu.add_command(label="About...", command=self.menu_call)
+
+    def onOpen(self):
+        filename = filedialog.askopenfilename(initialdir="~", title="Select file",
+                                                   filetypes=(("jpeg files", "*.rcg"), ("all files", "*.*")))
+        f = open(filename, 'r')
+        lines = f.readlines()
+        for l in lines:
+            message = parse(l)
+            if message.type == 'MessageRCGCycle':
+                visual_list.append(message)
+
+    def readFile(self, filename):
+
+        f = open(filename, "r")
+        text = f.read()
+        return text
 
     def menu_call(self):
         print('menu call back')

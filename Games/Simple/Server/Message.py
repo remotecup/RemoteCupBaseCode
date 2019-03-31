@@ -211,6 +211,14 @@ class MessageRCGCycle(Message):
 
 
 def parse(coded_msg):
+    ret = MessageRCGHeader.parse(coded_msg)
+    if ret[0]:
+        return ret[1]
+
+    ret = MessageRCGCycle.parse(coded_msg)
+    if ret[0]:
+        return ret[1]
+
     ret = MessageClientConnectRequest.parse(coded_msg)
     if ret[0]:
         return ret[1]
@@ -239,12 +247,6 @@ def parse(coded_msg):
     if ret[0]:
         return ret[1]
 
-    ret = MessageRCGHeader.parse(coded_msg)
-    if ret[0]:
-        return ret[1]
 
-    ret = MessageRCGCycle.parse(coded_msg)
-    if ret[0]:
-        return ret[1]
 
     return Message()
