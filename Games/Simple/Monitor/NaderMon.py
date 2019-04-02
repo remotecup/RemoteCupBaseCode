@@ -1,17 +1,17 @@
 from tkinter import *
 import socket
 from Games.Simple.Server.Message import *
-import Games.Simple.Server.Conf as Conf
 import threading
 import time
 import queue
 from tkinter import filedialog
 from tkinter import messagebox
+import Games.Simple.Monitor.Conf as Conf
 
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.settimeout(1)
-server_address = ('localhost', 20003)
+server_address = (Conf.ip, Conf.monitor_port)
 visual_queue = queue.Queue(0)
 visual_list = []
 is_run = True
@@ -196,7 +196,7 @@ class CToolbar:
         self.timer_scale.set(0)
         self.timer_min.set('0')
         self.timer_max.set('100')
-        self.timer_scale['to'] = Conf.max_cycle
+        self.timer_scale['to'] = 100
 
     def make_button(self):
         self.play_button = Button(self.toolbar, height=1, width=6, text='PLAY', command=self.main.gui.play)
@@ -213,14 +213,13 @@ class CGround:
         self.ground = Frame(main.root, height=390, width=500, background='green4')
         self.ground.place(x=0, y=90)
         # self.ground.bind("<Motion>", self.show_mouse_position)
-        self.max_i = 8
-        self.max_j = 5
+
         self.boards = {}
-        for i in range(self.max_i):
-            for j in range(self.max_j):
-                self.boards[(i, j)] = Frame(self.ground, width=500/self.max_j - 5, height=390/self.max_i - 5,
+        for i in range(Conf.max_i):
+            for j in range(Conf.max_j):
+                self.boards[(i, j)] = Frame(self.ground, width=500/Conf.max_j - 5, height=390/Conf.max_i - 5,
                                             bg='black')
-                self.boards[(i, j)].place(x=j*500/self.max_j, y=i*390/self.max_i)
+                self.boards[(i, j)].place(x=j*500/Conf.max_j, y=i*390/Conf.max_i)
                 self.boards[(i, j)].bind("<Motion>",
                                          lambda event, arg=(i, j): self.show_mouse_board(event, arg))
 
@@ -231,8 +230,8 @@ class CGround:
         self.main.statusbar.change_mouse_position(arg[0], arg[1])
 
     def show_board(self, board):
-        for i in range(self.max_i):
-            for j in range(self.max_j):
+        for i in range(Conf.max_i):
+            for j in range(Conf.max_j):
                 if board[i][j] == 1:
                     self.boards[(i, j)]['background'] = 'red'
                 elif board[i][j] == 2:
@@ -342,7 +341,7 @@ class Gui:
                 if not self.show_paused:
                     self.main_window.toolbar.timer_scale.set(self.show_cycle)
                     self.show_cycle += 1
-            time.sleep(0.1)
+            time.sleep(Conf.show_time_speed)
         print('show end')
 
     def play(self):
