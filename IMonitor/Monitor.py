@@ -8,7 +8,7 @@ from tkinter import messagebox
 import conf as conf
 if conf.game == 'Simple':
     import Games.Simple.Monitor.Conf as Conf
-    import Games.Simple.Monitor.NaderMon as GameMonitor
+    import Games.Simple.Monitor.Monitor as GameMonitor
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.settimeout(1)
