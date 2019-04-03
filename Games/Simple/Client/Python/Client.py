@@ -23,7 +23,7 @@ def run():
     while True:
         sock.sendto(message_snd, server_address)
         try:
-            message_rcv = sock.recvfrom(1024)
+            message_rcv = sock.recvfrom(4096)
         except:
             continue
         message = parse(message_rcv[0])
@@ -34,7 +34,7 @@ def run():
 
     while True:
         try:
-            r = sock.recvfrom(1024)
+            r = sock.recvfrom(4096)
         except:
             continue
         message = parse(r[0])

@@ -10,12 +10,12 @@ def run():
     message_snd = MessageMonitorConnectRequest().build()
     while True:
         sock.sendto(message_snd, server_address)
-        r = sock.recvfrom(1024)
+        r = sock.recvfrom(4096)
         message_rcv = parse(r[0])
         if message_rcv.type is 'MessageMonitorConnectResponse':
             break
     while True:
-        r = sock.recvfrom(1024)
+        r = sock.recvfrom(4096)
         message = parse(r[0])
         if message.type == 'MessageClientDisconnect':
             break

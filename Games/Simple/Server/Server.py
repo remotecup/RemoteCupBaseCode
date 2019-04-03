@@ -86,7 +86,7 @@ class Server:
         self.monitor_socket.bind((Conf.ip, Conf.monitor_port))
         self.action_queue = queue.Queue(0)
         self.monitor_queue = queue.Queue(0)
-        self.msg_size = 1024
+        self.msg_size = 4096
         self.listener = threading.Thread(target=listener,
                                          args=(self.player_socket, self.msg_size, self.action_queue,))
         self.listener.start()

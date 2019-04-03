@@ -1,16 +1,9 @@
 #!/usr/bin/python3
-
-import conf
-
-
-if conf.game == 'Simple':
-    import Games.Simple.Monitor.NaderMon as Monitor
-elif conf.game == 'Snake':
-    import Games.Snake.Monitor.Monitor as Monitor
+from IMonitor.Monitor import *
 
 
 def main():
-    Monitor.run()
+    run()
 
 
 if __name__ == "__main__":
