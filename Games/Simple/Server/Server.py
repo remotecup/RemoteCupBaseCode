@@ -7,8 +7,8 @@ import logging
 import datetime
 import random
 import Games.Simple.Server.Conf as Conf
-from Games.Simple.Server.Message import *
-from Games.Simple.Server.Math import *
+from Base.Message import *
+from Base.Math import *
 from Games.Simple.Server.Logger import *
 import signal
 
@@ -50,6 +50,20 @@ def monitor_listener(socket, msg_size, action_queue):
             action_queue.put(msg)
         except:
             continue
+
+
+def action_to_vector(string_action):
+    if string_action is 'u':
+        action = Vector2D(-1, 0)
+    elif string_action is 'd':
+        action = Vector2D(1, 0)
+    elif string_action is 'l':
+        action = Vector2D(0, -1)
+    elif string_action is 'r':
+        action = Vector2D(0, 1)
+    else:
+        action = None
+    return action
 
 
 class Agent:
@@ -248,8 +262,8 @@ class Server:
         if address not in self.agents:
             logging.error('message from invalid address, address: {}'.format(address))
             return False
-        action = message.vector_action
-        self.save_rcl(self.agents[address].id, message.string_message, message.vector_action)
+        action = action_to_vector(message.string_action)
+        self.save_rcl(self.agents[address].id, message.string_message, action)
         if action is None:
             action = self.agents[address].last_action
         self.agents[address].last_action = action

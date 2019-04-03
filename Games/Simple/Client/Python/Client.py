@@ -1,7 +1,7 @@
 import socket
 import random
 from argparse import ArgumentParser
-from Games.Simple.Server.Message import *
+from Base.Message import *
 from Games.Simple.Client.Python.World import *
 import Games.Simple.Client.Python.ClientGreedy as c_greedy
 import Games.Simple.Client.Python.ClientRandom as c_random

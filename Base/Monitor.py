@@ -1,6 +1,6 @@
 from tkinter import *
 import socket
-from Games.Simple.Server.Message import *
+from Base.Message import *
 import threading
 import time
 from tkinter import filedialog

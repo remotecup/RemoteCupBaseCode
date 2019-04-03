@@ -1,4 +1,4 @@
-from Games.Simple.Server.Math import *
+from Base.Math import *
 
 
 class Message:
@@ -134,9 +134,8 @@ class MessageClientWorld(Message):
 
 
 class MessageClientAction(Message):
-    def __init__(self, vector_action=Vector2D(0, 0), string_action='', string_message = ''):
+    def __init__(self, string_action='', string_message=''):
         self.type = "MessageClientAction"
-        self.vector_action = vector_action
         self.string_action = string_action
         self.string_message = string_message
 
@@ -150,17 +149,7 @@ class MessageClientAction(Message):
         msg = eval(str(coded_msg.decode("utf-8")))
         if msg['message_type'] == "MessageClientAction":
             string_action = msg['value']['action']
-            if string_action is 'u':
-                action = Vector2D(-1, 0)
-            elif string_action is 'd':
-                action = Vector2D(1, 0)
-            elif string_action is 'l':
-                action = Vector2D(0, -1)
-            elif string_action is 'r':
-                action = Vector2D(0, 1)
-            else:
-                action = None
-            message = MessageClientAction(vector_action=action, string_message=str(coded_msg.decode("utf-8")))
+            message = MessageClientAction(string_action=string_action, string_message=str(coded_msg.decode("utf-8")))
             return True, message
         return False, None
 

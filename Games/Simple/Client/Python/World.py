@@ -1,4 +1,4 @@
-from Games.Simple.Server.Math import *
+from Base.Math import *
 
 
 class World:

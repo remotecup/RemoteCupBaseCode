@@ -66,34 +66,3 @@ class Ground:
 
                 self.boards[(i, j)].bind("<Motion>",
                                          lambda event, arg=(i, j): self.show_mouse_board(event, arg))
-
-
-
-
-# class Example(Frame):
-#
-#     def __init__(self):
-#         super().__init__()
-#
-#         self.initUI()
-#
-#     def initUI(self):
-#         self.master.title("Shapes")
-#         self.pack(fill=BOTH, expand=1)
-#
-#         canvas = Canvas(self)
-#         canvas.create_oval(30, 30, 80, 80, outline="#f11",
-#                            fill="#1f1", width=2)
-#
-#         canvas.pack(fill=BOTH, expand=1)
-#
-#
-# def main():
-#     root = Tk()
-#     ex = Example()
-#     root.geometry("330x220+300+300")
-#     root.mainloop()
-#
-#
-# if __name__ == '__main__':
-#     main()
