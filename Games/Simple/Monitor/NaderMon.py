@@ -16,6 +16,8 @@ visual_queue = queue.Queue(0)
 visual_list = []
 is_run = True
 is_connected = False
+teams_number = 2
+board_size = (Conf.max_i, Conf.max_j)
 
 
 def push_online():
@@ -43,7 +45,7 @@ class CMenu:
         main.root.config(menu=menu)
         filemenu = Menu(menu)
         menu.add_cascade(label="File", menu=filemenu)
-        filemenu.add_command(label="Open...", command=self.onOpen)
+        filemenu.add_command(label="Open...", command=self.open_file)
         filemenu.add_command(label="Connect", command=self.send_connect_request)
         filemenu.add_command(label="Disconnect", command=self.disconnect)
         filemenu.add_separator()
@@ -52,7 +54,7 @@ class CMenu:
         menu.add_cascade(label="Help", menu=helpmenu)
         helpmenu.add_command(label="About...", command=self.menu_call)
 
-    def onOpen(self):
+    def open_file(self):
         global is_connected
         filename = filedialog.askopenfilename(initialdir="~", title="Select file",
                                               filetypes=(("jpeg files", "*.rcg"), ("all files", "*.*")))
@@ -64,15 +66,15 @@ class CMenu:
             visual_list.clear()
             for l in lines:
                 message = parse(l)
+                if message.type == 'MessageRCGHeader':
+                    Conf.max_i = message.board_size[0]
+                    Conf.max_j = message.board_size[1]
+                    if Conf.max_i != board_size[0] or Conf.max_j != board_size[1]:
+                        self.main.reset_ground()
                 if message.type == 'MessageRCGCycle':
                     visual_list.append(message)
         except:
             pass
-
-    def readFile(self, filename):
-        f = open(filename, "r")
-        text = f.read()
-        return text
 
     def menu_call(self):
         print('menu call back')
@@ -104,6 +106,10 @@ class CMenu:
             message_rcv = parse(r[0])
             print(message_rcv)
             if message_rcv.type is 'MessageMonitorConnectResponse':
+                Conf.max_i = message_rcv.board_size[0]
+                Conf.max_j = message_rcv.board_size[1]
+                if Conf.max_i != board_size[0] or Conf.max_j != board_size[1]:
+                    self.main.reset_ground()
                 print('receive resp')
                 th = threading.Thread(target=push_online)
                 th.start()
@@ -213,13 +219,14 @@ class CGround:
         self.ground = Frame(main.root, height=390, width=500, background='green4')
         self.ground.place(x=0, y=90)
         # self.ground.bind("<Motion>", self.show_mouse_position)
-
+        self.last_max_i = Conf.max_i
+        self.last_max_j = Conf.max_j
         self.boards = {}
-        for i in range(Conf.max_i):
-            for j in range(Conf.max_j):
-                self.boards[(i, j)] = Frame(self.ground, width=500/Conf.max_j - 5, height=390/Conf.max_i - 5,
+        for i in range(self.last_max_i):
+            for j in range(self.last_max_j):
+                self.boards[(i, j)] = Frame(self.ground, width=500/self.last_max_j - 5, height=390/self.last_max_i - 5,
                                             bg='black')
-                self.boards[(i, j)].place(x=j*500/Conf.max_j, y=i*390/Conf.max_i)
+                self.boards[(i, j)].place(x=j*500/self.last_max_j, y=i*390/self.last_max_i)
                 self.boards[(i, j)].bind("<Motion>",
                                          lambda event, arg=(i, j): self.show_mouse_board(event, arg))
 
@@ -240,6 +247,23 @@ class CGround:
                     self.boards[(i, j)]['background'] = 'green'
                 else:
                     self.boards[(i, j)]['background'] = 'black'
+
+    def reset(self):
+        for i in range(self.last_max_i):
+            for j in range(self.last_max_j):
+                self.boards[(i, j)].destroy()
+
+        self.last_max_i = Conf.max_i
+        self.last_max_j = Conf.max_j
+        self.boards.clear()
+        for i in range(self.last_max_i):
+            for j in range(self.last_max_j):
+                self.boards[(i, j)] = Frame(self.ground, width=500 / self.last_max_j - 5,
+                                            height=390 / self.last_max_i - 5,
+                                            bg='black')
+                self.boards[(i, j)].place(x=j * 500 / self.last_max_j, y=i * 390 / self.last_max_i)
+                self.boards[(i, j)].bind("<Motion>",
+                                         lambda event, arg=(i, j): self.show_mouse_board(event, arg))
 
 
 class CStatusBar:
@@ -264,9 +288,8 @@ class MainWindow:
         self.root.protocol("WM_DELETE_WINDOW", self.close_window)
         self.root.bind('<Left>', self.left_key)
         self.root.bind('<Right>', self.right_key)
-        self.root.title('Monitor')
-        img = PhotoImage(file='icons/icon.png')
-        self.root.tk.call('wm', 'iconphoto', self.root._w, img)
+        self.root.title('RemoteCup Monitor')
+        self.root.tk.call('wm', 'iconphoto', self.root._w, PhotoImage(file='icons/icon.png'))
         self.root.geometry('500x500')
         self.root.pack_propagate(0)
 
@@ -278,6 +301,8 @@ class MainWindow:
         self.short_cut_key()
 
     def show_message(self, message):
+        print(message)
+        print(message.board)
         self.ground.show_board(message.board)
         self.results.update(message.score)
 
@@ -309,9 +334,15 @@ class MainWindow:
         self.toolbar.timer_scale.set(self.gui.show_cycle)
         self.gui.pause()
 
+    def reset_ground(self):
+        global board_size
+        board_size = (Conf.max_i, Conf.max_j)
+        self.ground.reset()
+
+
 class Gui:
     def __init__(self):
-        self.show_cycle = 0
+        self.showed_cycle = 0
         self.show_paused = False
         self.main_window = None
         pass
@@ -324,23 +355,23 @@ class Gui:
     def show(self):
         print('{} show'.format(threading.current_thread().ident))
         print('show start')
-        while self.main_window is None and is_run:
+        while self.main_window is None and is_run:  # wait for start gui_thread
             time.sleep(1)
         print('show started')
         while is_run:
-            print('{} {}'.format(self.show_cycle, len(visual_list)))
+            print('{} {}'.format(self.showed_cycle, len(visual_list)))
             tmp = 0 if len(visual_list) == 0 else visual_list[0].cycle
             self.main_window.toolbar.timer_min.set(tmp)
             self.main_window.toolbar.timer_max.set(len(visual_list) + tmp)
-            self.main_window.toolbar.timer_show.set(self.show_cycle + tmp)
+            self.main_window.toolbar.timer_show.set(self.showed_cycle + tmp)
             self.main_window.toolbar.timer_scale['to'] = len(visual_list)
 
-            if self.show_cycle < len(visual_list):
-                self.main_window.show_message(visual_list[self.show_cycle])
+            if self.showed_cycle < len(visual_list):
+                self.main_window.show_message(visual_list[self.showed_cycle])
 
                 if not self.show_paused:
-                    self.main_window.toolbar.timer_scale.set(self.show_cycle)
-                    self.show_cycle += 1
+                    self.main_window.toolbar.timer_scale.set(self.showed_cycle)
+                    self.showed_cycle += 1
             time.sleep(Conf.show_time_speed)
         print('show end')
 
@@ -359,19 +390,19 @@ class Gui:
 
     def online(self):
         self.play()
-        self.show_cycle = len(visual_list) - 1
+        self.showed_cycle = len(visual_list) - 1
 
     def reset_show(self):
-        self.show_cycle = 0
+        self.showed_cycle = 0
         self.play()
 
 
 def run():
     gui = Gui()
-    th = threading.Thread(target=gui.start)
-    th.start()
-    thshow = threading.Thread(target=gui.show)
-    thshow.start()
+    gui_thread = threading.Thread(target=gui.start)  # main loop
+    gui_thread.start()
+    show_tread = threading.Thread(target=gui.show)  # show ground step by step
+    show_tread.start()
     while is_run:
         time.sleep(1)
     # th.join()

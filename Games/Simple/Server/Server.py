@@ -232,7 +232,8 @@ class Server:
                 if message.type == 'MessageMonitorConnectRequest':
                     if msg_address[1] not in self.monitors:
                         self.monitors.append(msg_address[1])
-                    self.player_socket.sendto(MessageMonitorConnectResponse(self.goal_id).build(), msg_address[1])
+                    self.player_socket.sendto(MessageMonitorConnectResponse(self.goal_id, (Conf.max_i, Conf.max_j))
+                                              .build(), msg_address[1])
                     self.start = True
             except:
                 return
@@ -294,7 +295,7 @@ class Server:
         for key in self.agents:
             team = {'name': self.agents[key].name, 'id': self.agents[key].id}
             teams.append(team)
-        message = MessageRCGHeader(teams).build()
+        message = MessageRCGHeader(teams, (Conf.max_i, Conf.max_j)).build()
         rcg_logger.info(message)
 
     def save_rcg_cycle(self):

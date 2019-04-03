@@ -90,12 +90,13 @@ class MessageMonitorConnectRequest(Message):
 
 
 class MessageMonitorConnectResponse(Message):
-    def __init__(self, goal_id):
+    def __init__(self, goal_id, board_size):
         self.type = "MessageMonitorConnectResponse"
         self.goal_id = goal_id
+        self.board_size = board_size
 
     def build(self):
-        msg = {"message_type": self.type, "value": {'goal_id': self.goal_id}}
+        msg = {"message_type": self.type, "value": {'goal_id': self.goal_id, 'board_size': self.board_size}}
         str_msg = str.encode(str(msg))
         return str_msg
 
@@ -103,7 +104,7 @@ class MessageMonitorConnectResponse(Message):
     def parse(coded_msg):
         msg = eval(str(coded_msg.decode("utf-8")))
         if msg['message_type'] == "MessageMonitorConnectResponse":
-            message = MessageMonitorConnectResponse(msg['value']['goal_id'])
+            message = MessageMonitorConnectResponse(msg['value']['goal_id'], msg['value']['board_size'])
             return True, message
         return False, None
 
@@ -165,12 +166,13 @@ class MessageClientAction(Message):
 
 
 class MessageRCGHeader(Message):
-    def __init__(self, teams):
+    def __init__(self, teams, board_size):
         self.type = "MessageRCGHeader"
         self.teams = teams
+        self.board_size = board_size
 
     def build(self):
-        msg = {"message_type": self.type, "value": {"teams": self.teams}}
+        msg = {"message_type": self.type, "value": {"teams": self.teams, "board_size": self.board_size}}
         str_msg = str.encode(str(msg))
         str_msg = str(msg)
         return str_msg
@@ -181,7 +183,8 @@ class MessageRCGHeader(Message):
         msg = eval(coded_msg)
         if msg['message_type'] == "MessageRCGHeader":
             teams = msg['value']['teams']
-            message = MessageRCGHeader(teams)
+            board_size = msg['value']['board_size']
+            message = MessageRCGHeader(teams, board_size)
             return True, message
         return False, None
 
