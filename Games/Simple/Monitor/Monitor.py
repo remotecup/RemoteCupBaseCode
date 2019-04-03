@@ -1,14 +1,16 @@
 from Base.Monitor import *
-
+from Base.Math import *
 
 class Ground:
-    def __init__(self, main):
+    def __init__(self, main, ground_config):
         self.main = main
         self.ground = Frame(main.root, height=390, width=500, background='green4')
         self.ground.place(x=0, y=90)
         # self.ground.bind("<Motion>", self.show_mouse_position)
-        self.last_max_i = Conf.max_i
-        self.last_max_j = Conf.max_j
+        self.ground_config = ground_config
+        if ground_config is None:
+            self.last_max_i = 0
+            self.last_max_j = 0
         self.boards = {}
         for i in range(self.last_max_i):
             for j in range(self.last_max_j):
@@ -25,26 +27,22 @@ class Ground:
         self.main.statusbar.change_mouse_position(arg[0], arg[1])
 
     def show_board(self, board):
-        for i in range(Conf.max_i):
-            for j in range(Conf.max_j):
-                if board[i][j] == 1:
-                    self.boards[(i, j)]['background'] = 'red'
-                elif board[i][j] == 2:
-                    self.boards[(i, j)]['background'] = 'blue'
-                elif board[i][j] == 3:
-                    self.boards[(i, j)]['background'] = 'Orange'
-                elif board[i][j] == 4:
-                    self.boards[(i, j)]['background'] = 'green'
+        print(self.ground_config)
+        for i in range(self.ground_config['max_i']):
+            for j in range(self.ground_config['max_j']):
+                if board[i][j] > self.ground_config['team_number']:
+                    self.boards[(i, j)]['background'] = simple_color['g']
                 else:
-                    self.boards[(i, j)]['background'] = 'black'
+                    self.boards[(i, j)]['background'] = simple_color[board[i][j]]
 
-    def reset(self):
+    def reset(self, ground_config):
+        self.ground_config = ground_config
         for i in range(self.last_max_i):
             for j in range(self.last_max_j):
                 self.boards[(i, j)].destroy()
 
-        self.last_max_i = Conf.max_i
-        self.last_max_j = Conf.max_j
+        self.last_max_i = ground_config['max_i']
+        self.last_max_j = ground_config['max_j']
         self.boards.clear()
         for i in range(self.last_max_i):
             for j in range(self.last_max_j):

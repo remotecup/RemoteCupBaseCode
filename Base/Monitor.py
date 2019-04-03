@@ -17,7 +17,7 @@ visual_list = []
 is_run = True
 is_connected = False
 teams_number = 2
-board_size = (Conf.max_i, Conf.max_j)
+ground_config = None
 
 
 def push_online():
@@ -44,31 +44,34 @@ class CMenu:
         main.root.config(menu=menu)
         filemenu = Menu(menu)
         menu.add_cascade(label="File", menu=filemenu)
-        filemenu.add_command(label="Open...", command=self.open_file)
-        filemenu.add_command(label="Connect", command=self.send_connect_request)
-        filemenu.add_command(label="Disconnect", command=self.disconnect)
+        filemenu.add_command(label="Open...", command=self.open_file, accelerator="Ctrl+o")
+        filemenu.add_command(label="Connect", command=self.send_connect_request, accelerator="Ctrl+c")
+        filemenu.add_command(label="Disconnect", command=self.disconnect, accelerator="Ctrl+d")
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=self.main.close_window)
         helpmenu = Menu(menu)
         menu.add_cascade(label="Help", menu=helpmenu)
         helpmenu.add_command(label="About...", command=self.menu_call)
 
-    def open_file(self):
-        global is_connected
+    def open_file(self, event=''):
+        global is_connected, ground_config
+        if is_connected:
+            is_connected = False
+            self.disconnect()
         filename = filedialog.askopenfilename(initialdir="~", title="Select file",
                                               filetypes=(("jpeg files", "*.rcg"), ("all files", "*.*")))
         try:
             f = open(filename, 'r')
             lines = f.readlines()
-            is_connected = False
             self.main.gui.reset_show()
             visual_list.clear()
             for l in lines:
                 message = parse(l)
                 if message.type == 'MessageRCGHeader':
-                    Conf.max_i = message.board_size[0]
-                    Conf.max_j = message.board_size[1]
-                    if Conf.max_i != board_size[0] or Conf.max_j != board_size[1]:
+                    Conf.max_i = message.ground_config
+
+                    if ground_config != message.ground_config:
+                        ground_config = message.ground_config
                         self.main.reset_ground()
                 if message.type == 'MessageRCGCycle':
                     visual_list.append(message)
@@ -79,7 +82,7 @@ class CMenu:
         print('menu call back')
 
     def send_connect_request(self, event=''):
-        global is_connected
+        global is_connected, ground_config
         if is_connected:
             messagebox.showerror('connect error', 'please disconnect')
             print('please disconnected')
@@ -105,9 +108,8 @@ class CMenu:
             message_rcv = parse(r[0])
             print(message_rcv)
             if message_rcv.type is 'MessageMonitorConnectResponse':
-                Conf.max_i = message_rcv.board_size[0]
-                Conf.max_j = message_rcv.board_size[1]
-                if Conf.max_i != board_size[0] or Conf.max_j != board_size[1]:
+                if ground_config != message_rcv.ground_config:
+                    ground_config = message_rcv.ground_config
                     self.main.reset_ground()
                 print('receive resp')
                 th = threading.Thread(target=push_online)
@@ -116,9 +118,11 @@ class CMenu:
             else:
                 continue
 
-    def disconnect(self):
+    def disconnect(self, event=''):
         global is_connected
         is_connected = False
+        message_snd = MessageMonitorDisconnect().build()
+        sock.sendto(message_snd, server_address)
 
 class CResults:
     def __init__(self, main):
@@ -126,16 +130,18 @@ class CResults:
         self.results = Frame(main.root, height=40, width=500, background='gray60')
         self.results.place(x=0, y=0)
         self.team_results = []
-        self.team_results.append(Label(self.results, text='First_team: 0', bg='gray60', fg='red'))
+        self.team_results.append(Label(self.results, text='First_team: 0', bg='gray60', fg=simple_color[1]))
         self.team_results[-1].place(x=0, y=0)
-        self.team_results.append(Label(self.results, text='Second_team: 0', bg='gray60', fg='blue'))
+        self.team_results.append(Label(self.results, text='Second_team: 0', bg='gray60', fg=simple_color[2]))
         self.team_results[-1].place(x=150, y=0)
-        self.team_results.append(Label(self.results, text='Third_team: 0', bg='gray60', fg='orange'))
+        self.team_results.append(Label(self.results, text='Third_team: 0', bg='gray60', fg=simple_color[3]))
         self.team_results[-1].place(x=0, y=15)
-        self.team_results.append(Label(self.results, text='Fourth_team: 0', bg='gray60', fg='yellow'))
+        self.team_results.append(Label(self.results, text='Fourth_team: 0', bg='gray60', fg=simple_color[4]))
         self.team_results[-1].place(x=150, y=15)
 
     def update(self, score):
+        for i in range(4):
+            self.team_results[i]['text'] = str(0)
         i = 0
         for key in score.keys():
             self.team_results[i]['text'] = key + ':' + str(score[key])
@@ -264,7 +270,7 @@ class MainWindow:
         self.results = CResults(self)
         self.statusbar = CStatusBar(self)
         self.toolbar = CToolbar(self)
-        self.ground = GameMonitor.Ground(self)
+        self.ground = GameMonitor.Ground(self, ground_config)
         self.short_cut_key()
 
     def show_message(self, message):
@@ -276,6 +282,8 @@ class MainWindow:
     def short_cut_key(self):
         self.root.bind("<space>", self.gui.play_pause)
         self.root.bind("<Control-c>", self.menu.send_connect_request)
+        self.root.bind("<Control-d>", self.menu.disconnect)
+        self.root.bind("<Control-o>", self.menu.open_file)
 
     def close_window(self):
         global is_run
@@ -302,9 +310,7 @@ class MainWindow:
         self.gui.pause()
 
     def reset_ground(self):
-        global board_size
-        board_size = (Conf.max_i, Conf.max_j)
-        self.ground.reset()
+        self.ground.reset(ground_config)
 
 
 class Gui:

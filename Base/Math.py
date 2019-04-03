@@ -1,3 +1,6 @@
+simple_color = {0: 'black', 1: 'red', 2: 'blue', 3: 'orange', 4: 'pink', 'g': 'green'}
+
+
 class Vector2D:
     def __init__(self, i, j):
         self.i = i

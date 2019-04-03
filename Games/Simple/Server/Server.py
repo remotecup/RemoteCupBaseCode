@@ -246,9 +246,14 @@ class Server:
                 if message.type == 'MessageMonitorConnectRequest':
                     if msg_address[1] not in self.monitors:
                         self.monitors.append(msg_address[1])
-                    self.player_socket.sendto(MessageMonitorConnectResponse(self.goal_id, (Conf.max_i, Conf.max_j))
+                    self.player_socket.sendto(MessageMonitorConnectResponse(self.goal_id,
+                                                                            {'max_i': Conf.max_i, 'max_j': Conf.max_j,
+                                                                             'team_number': Conf.agent_numbers})
                                               .build(), msg_address[1])
                     self.start = True
+                elif message.type == 'MessageMonitorDisconnect':
+                    if msg_address[1] in self.monitors:
+                        self.monitors.remove(msg_address[1])
             except:
                 return
 
@@ -309,7 +314,8 @@ class Server:
         for key in self.agents:
             team = {'name': self.agents[key].name, 'id': self.agents[key].id}
             teams.append(team)
-        message = MessageRCGHeader(teams, (Conf.max_i, Conf.max_j)).build()
+        message = MessageRCGHeader(teams, {'max_i': Conf.max_i, 'max_j': Conf.max_j,
+                                           'team_number': Conf.agent_numbers}).build()
         rcg_logger.info(message)
 
     def save_rcg_cycle(self):
