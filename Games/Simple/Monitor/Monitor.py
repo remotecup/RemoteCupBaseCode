@@ -32,6 +32,8 @@ class Ground:
                 elif board[i][j] == 2:
                     self.boards[(i, j)]['background'] = 'blue'
                 elif board[i][j] == 3:
+                    self.boards[(i, j)]['background'] = 'Orange'
+                elif board[i][j] == 4:
                     self.boards[(i, j)]['background'] = 'green'
                 else:
                     self.boards[(i, j)]['background'] = 'black'

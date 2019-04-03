@@ -46,7 +46,7 @@ def run():
 
             if args.client_type == 'greedy' or (args.client_type == 'auto' and world.self_id == 1):
                 action = c_greedy.get_action(world)
-            elif args.client_type == 'random' or (args.client_type == 'auto' and world.self_id == 2):
+            elif args.client_type == 'random' or (args.client_type == 'auto' and world.self_id >= 2):
                 action = c_random.get_action(world)
             elif args.client_type == 'hand':
                 action = input('enter action (u or d or l or r:')

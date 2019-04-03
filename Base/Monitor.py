@@ -130,6 +130,10 @@ class CResults:
         self.team_results[-1].place(x=0, y=0)
         self.team_results.append(Label(self.results, text='Second_team: 0', bg='gray60', fg='blue'))
         self.team_results[-1].place(x=150, y=0)
+        self.team_results.append(Label(self.results, text='Third_team: 0', bg='gray60', fg='orange'))
+        self.team_results[-1].place(x=0, y=15)
+        self.team_results.append(Label(self.results, text='Fourth_team: 0', bg='gray60', fg='yellow'))
+        self.team_results[-1].place(x=150, y=15)
 
     def update(self, score):
         i = 0
