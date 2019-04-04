@@ -1,1 +1,2 @@
-game = 'Simple'
+# game = 'Simple'
+game = 'Snake'

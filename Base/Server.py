@@ -4,12 +4,17 @@ import threading
 import queue
 import logging
 import datetime
-import Games.Simple.Server.Conf as Conf
 from Base.Message import *
 from Base.Math import *
 from Games.Simple.Server.Logger import *
 import signal
 import copy
+import conf
+if conf.game == 'Simple':
+    import Games.Simple.Server.Conf as Conf
+elif conf.game == 'Snake':
+    import Games.Snake.Server.Conf as Conf
+
 
 
 is_run = True

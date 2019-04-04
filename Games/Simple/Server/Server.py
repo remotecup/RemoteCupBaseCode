@@ -1,4 +1,5 @@
 from Base.Server import *
+import Games.Simple.Server.Conf as Conf
 import random
 
 
