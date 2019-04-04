@@ -68,8 +68,6 @@ class CMenu:
             for l in lines:
                 message = parse(l)
                 if message.type == 'MessageRCGHeader':
-                    Conf.max_i = message.ground_config
-
                     if ground_config != message.ground_config:
                         ground_config = message.ground_config
                         self.main.reset_ground()
@@ -123,6 +121,7 @@ class CMenu:
         is_connected = False
         message_snd = MessageMonitorDisconnect().build()
         sock.sendto(message_snd, server_address)
+
 
 class CResults:
     def __init__(self, main):

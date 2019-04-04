@@ -34,13 +34,13 @@ class MessageClientConnectRequest(Message):
 
 
 class MessageClientConnectResponse(Message):
-    def __init__(self, id, goal_id):
+    def __init__(self, id, ground_config):
         self.type = "MessageClientConnectResponse"
         self.id = id
-        self.goal_id = goal_id
+        self.ground_config = ground_config
 
     def build(self):
-        msg = {"message_type": self.type, "value": {"id": self.id, "goal_id": self.goal_id}}
+        msg = {"message_type": self.type, "value": {"id": self.id, 'ground_config': self.ground_config}}
         str_msg = str.encode(str(msg))
         return str_msg
 
@@ -48,7 +48,7 @@ class MessageClientConnectResponse(Message):
     def parse(coded_msg):
         msg = eval(str(coded_msg.decode("utf-8")))
         if msg['message_type'] == "MessageClientConnectResponse":
-            message = MessageClientConnectResponse(msg['value']['id'], msg['value']['goal_id'])
+            message = MessageClientConnectResponse(msg['value']['id'], msg['value']['ground_config'])
             return True, message
         return False, None
 
@@ -90,13 +90,12 @@ class MessageMonitorConnectRequest(Message):
 
 
 class MessageMonitorConnectResponse(Message):
-    def __init__(self, goal_id, ground_config):
+    def __init__(self, ground_config):
         self.type = "MessageMonitorConnectResponse"
-        self.goal_id = goal_id
         self.ground_config = ground_config
 
     def build(self):
-        msg = {"message_type": self.type, "value": {'goal_id': self.goal_id, 'ground_config': self.ground_config}}
+        msg = {"message_type": self.type, "value": {'ground_config': self.ground_config}}
         str_msg = str.encode(str(msg))
         return str_msg
 
@@ -104,7 +103,7 @@ class MessageMonitorConnectResponse(Message):
     def parse(coded_msg):
         msg = eval(str(coded_msg.decode("utf-8")))
         if msg['message_type'] == "MessageMonitorConnectResponse":
-            message = MessageMonitorConnectResponse(msg['value']['goal_id'], msg['value']['ground_config'])
+            message = MessageMonitorConnectResponse(msg['value']['ground_config'])
             return True, message
         return False, None
 

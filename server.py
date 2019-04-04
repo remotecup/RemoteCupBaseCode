@@ -8,10 +8,11 @@ elif conf.game == 'Snake':
     import Games.Snake.Server.Server as Game
 
 
-
-
 def main():
-    g = Game.Server()
+    if conf.game == 'Simple':
+        g = Game.SimpleServer()
+    elif conf.game == 'Snake':
+        g = Game.SnakeServer()
     g.connect()
     g.run()
     g.disconnect()

@@ -29,7 +29,7 @@ def run():
         message = parse(message_rcv[0])
         if message.type == 'MessageClientConnectResponse':
             print('my id is ' + str(message.id))
-            world.set_id(message.id, message.goal_id)
+            world.set_id(message.id, message.ground_config['goal_id'])
             break
 
     while True:
