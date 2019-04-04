@@ -31,6 +31,12 @@ class SnakeAgent(Agent):
         self.next_pos.j = self.pos.j + self.last_action.j
         logging.debug('pos {} action {} to {}'.format(self.pos, self.last_action, self.next_pos))
 
+    def reset(self):
+        pass
+
+    def update_world(self, world):
+        pass
+
 
 class SnakeServer(Server):
     def __init__(self):

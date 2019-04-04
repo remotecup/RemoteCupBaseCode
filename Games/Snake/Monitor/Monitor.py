@@ -15,7 +15,7 @@ class Ground:
         self.boards = {}
         for i in range(self.last_max_i):
             for j in range(self.last_max_j):
-                self.boards[(i, j)] = Frame(self.ground, width=500/self.last_max_j - 5, height=390/self.last_max_i - 5,
+                self.boards[(i, j)] = Frame(self.ground, width=500/self.last_max_j - 1, height=390/self.last_max_i - 1,
                                             bg='black')
                 self.boards[(i, j)].place(x=j*500/self.last_max_j, y=i*390/self.last_max_i)
                 self.boards[(i, j)].bind("<Motion>",
@@ -49,8 +49,8 @@ class Ground:
         self.boards.clear()
         for i in range(self.last_max_i):
             for j in range(self.last_max_j):
-                self.boards[(i, j)] = Frame(self.ground, width=500 / self.last_max_j - 5,
-                                            height=390 / self.last_max_i - 5,
+                self.boards[(i, j)] = Frame(self.ground, width=500 / self.last_max_j - 1,
+                                            height=390 / self.last_max_i - 1,
                                             bg='black')
                 self.boards[(i, j)].place(x=j * 500 / self.last_max_j, y=i * 390 / self.last_max_i)
                 self.boards[(i, j)].bind("<Motion>",
