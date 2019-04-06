@@ -15,14 +15,18 @@ class World:
         self.goal_id = goal_id
 
     def update(self, message):
-        self.board = message.board
+        self.board = message.board['board']
         self.cycle = message.cycle
+        print(self.cycle)
+        self.self_position = Vector2D(message.board['heads'][self.self_id][0],message.board['heads'][self.self_id][1])
+        print(self.self_position)
+
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
-                if self.board[i][j] == self.self_id:
-                    self.self_position = Vector2D(i, j)
                 if self.board[i][j] == self.goal_id:
                     self.goal_position = Vector2D(i, j)
+
+        print('g id', self.goal_id, self.goal_position)
 
     def print(self):
         print('cycle: {}'.format(self.cycle))

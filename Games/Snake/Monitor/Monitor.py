@@ -31,12 +31,12 @@ class Ground:
         print(self.ground_config)
         for i in range(self.ground_config['max_i']):
             for j in range(self.ground_config['max_j']):
-                if board[i][j] == -1:
+                if board['board'][i][j] == -1:
                     self.boards[(i, j)]['background'] = simple_color['w']
-                elif board[i][j] > self.ground_config['team_number']:
+                elif board['board'][i][j] > self.ground_config['team_number']:
                     self.boards[(i, j)]['background'] = simple_color['g']
                 else:
-                    self.boards[(i, j)]['background'] = simple_color[board[i][j]]
+                    self.boards[(i, j)]['background'] = simple_color[board['board'][i][j]]
 
     def reset(self, ground_config):
         self.ground_config = ground_config

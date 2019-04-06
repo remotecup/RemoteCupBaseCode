@@ -2,9 +2,9 @@ import socket
 import random
 from argparse import ArgumentParser
 from Base.Message import *
-from Games.Simple.Client.Python.World import *
-import Games.Simple.Client.Python.ClientGreedy as c_greedy
-import Games.Simple.Client.Python.ClientRandom as c_random
+from Games.Snake.Client.Python.World import *
+import Games.Snake.Client.Python.ClientGreedy as c_greedy
+import Games.Snake.Client.Python.ClientRandom as c_random
 
 
 def run():
