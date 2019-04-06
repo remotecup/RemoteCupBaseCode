@@ -28,7 +28,7 @@ def signal_handler(sig, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-log_file_name = datetime.datetime.now().strftime('{}-%Y-%m-%d-%H-%M-%S'.format(conf.game_name))
+log_file_name = datetime.datetime.now().strftime('{}-%Y-%m-%d-%H-%M-%S'.format(Conf.game_name))
 rcg_logger = setup_logger('rcg_logger', log_file_name + '.rcg')
 rcl_logger = setup_logger('rcl_logger', log_file_name + '.rcl')
 

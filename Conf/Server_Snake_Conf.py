@@ -1,4 +1,4 @@
-game_name       = 'Simple'
+game_name       = 'Snake'
 agent_numbers   = 4
 max_i           = 15
 max_j           = 10
