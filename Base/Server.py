@@ -2,11 +2,10 @@ import time
 import socket
 import threading
 import queue
-import logging
 import datetime
 from Base.Message import *
 from Base.Math import *
-from Games.Simple.Server.Logger import *
+from Base.Logger import *
 import signal
 import copy
 import Conf.conf as conf
@@ -29,7 +28,7 @@ def signal_handler(sig, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-log_file_name = datetime.datetime.now().strftime('{}-%Y-%m-%d-%H-%M-%S'.format(Conf.game_name))
+log_file_name = datetime.datetime.now().strftime('{}-%Y-%m-%d-%H-%M-%S'.format(conf.game_name))
 rcg_logger = setup_logger('rcg_logger', log_file_name + '.rcg')
 rcl_logger = setup_logger('rcl_logger', log_file_name + '.rcl')
 
