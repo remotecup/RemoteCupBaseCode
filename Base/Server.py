@@ -9,11 +9,11 @@ from Base.Math import *
 from Games.Simple.Server.Logger import *
 import signal
 import copy
-import conf
+import Conf.conf as conf
 if conf.game == 'Simple':
-    import Games.Simple.Server.Conf as Conf
+    import Conf.Server_Simple_Conf as Conf
 elif conf.game == 'Snake':
-    import Games.Snake.Server.Conf as Conf
+    import Conf.Server_Snake_Conf as Conf
 
 
 

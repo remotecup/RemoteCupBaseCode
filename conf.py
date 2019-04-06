@@ -1,2 +1,0 @@
-# game = 'Simple'
-game = 'Snake'

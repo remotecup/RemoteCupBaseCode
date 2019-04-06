@@ -5,12 +5,12 @@ import threading
 import time
 from tkinter import filedialog
 from tkinter import messagebox
-import conf as conf
+import Conf.conf as conf
 if conf.game == 'Simple':
-    import Games.Simple.Monitor.Conf as Conf
+    import Conf.Monitor_Simple_Conf as Conf
     import Games.Simple.Monitor.Monitor as GameMonitor
 elif conf.game == 'Snake':
-    import Games.Snake.Monitor.Conf as Conf
+    import Conf.Monitor_Snake_Conf as Conf
     import Games.Snake.Monitor.Monitor as GameMonitor
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import conf
+import Conf.conf as conf
 
 if conf.game == 'Simple':
     import Games.Simple.Server.Server as Game

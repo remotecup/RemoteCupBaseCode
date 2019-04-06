@@ -1,0 +1,2 @@
+game = 'Simple'
+# game = 'Snake'

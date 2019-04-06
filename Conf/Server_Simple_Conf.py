@@ -1,6 +1,6 @@
 game_name       = 'Simple'
 agent_numbers   = 2
-max_i           = 8
+max_i           = 5
 max_j           = 5
 max_cycle       = 1000
 ip              = "0.0.0.0"
