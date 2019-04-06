@@ -204,7 +204,7 @@ class CToolbar:
 
     def changed_scale(self, value):
         if self.scale_mouse_click:
-            self.main.gui.show_cycle = int(self.timer_scale.get())
+            self.main.gui.showed_cycle = int(self.timer_scale.get())
             self.main.gui.pause()
             print(self.timer_scale.get())
 
