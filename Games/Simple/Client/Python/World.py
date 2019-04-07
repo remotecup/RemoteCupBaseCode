@@ -15,7 +15,7 @@ class World:
         self.goal_id = goal_id
 
     def update(self, message):
-        self.board = message.board
+        self.board = message.world
         self.cycle = message.cycle
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):

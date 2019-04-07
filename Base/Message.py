@@ -127,14 +127,14 @@ class MessageMonitorDisconnect(Message):
 
 
 class MessageClientWorld(Message):
-    def __init__(self, cycle, board, score):
+    def __init__(self, cycle, world, score):
         self.type = "MessageClientWorld"
         self.cycle = cycle
-        self.board = board
+        self.world = world
         self.score = score
 
     def build(self):
-        msg = {"message_type": self.type, "value": {"cycle": self.cycle, "score": self.score, "board": self.board}}
+        msg = {"message_type": self.type, "value": {"cycle": self.cycle, "score": self.score, "world": self.world}}
         str_msg = str.encode(str(msg))
         return str_msg
 
@@ -143,7 +143,7 @@ class MessageClientWorld(Message):
         msg = eval(str(coded_msg.decode("utf-8")))
         if msg['message_type'] == "MessageClientWorld":
             cycle = msg['value']['cycle']
-            world = msg['value']['board']
+            world = msg['value']['world']
             score = msg['value']['score']
             message = MessageClientWorld(cycle, world, score)
             return True, message
@@ -196,14 +196,14 @@ class MessageRCGHeader(Message):
 
 
 class MessageRCGCycle(Message):
-    def __init__(self, cycle, board, score):
+    def __init__(self, cycle, world, score):
         self.type = "MessageRCGCycle"
         self.cycle = cycle
-        self.board = board
+        self.world = world
         self.score = score
 
     def build(self):
-        msg = {"message_type": self.type, "value": {"cycle": self.cycle, "score": self.score, "board": self.board}}
+        msg = {"message_type": self.type, "value": {"cycle": self.cycle, "score": self.score, "world": self.world}}
         str_msg = str(msg)
         return str_msg
 
@@ -212,7 +212,7 @@ class MessageRCGCycle(Message):
         msg = eval(coded_msg)
         if msg['message_type'] == "MessageRCGCycle":
             cycle = msg['value']['cycle']
-            world = msg['value']['board']
+            world = msg['value']['world']
             score = msg['value']['score']
             message = MessageRCGCycle(cycle, world, score)
             return True, message

@@ -15,10 +15,10 @@ class World:
         self.goal_id = goal_id
 
     def update(self, message):
-        self.board = message.board['board']
+        self.board = message.world['board']
         self.cycle = message.cycle
         print(self.cycle)
-        self.self_position = Vector2D(message.board['heads'][self.self_id][0],message.board['heads'][self.self_id][1])
+        self.self_position = Vector2D(message.world['heads'][self.self_id][0], message.world['heads'][self.self_id][1])
         print(self.self_position)
 
         for i in range(len(self.board)):

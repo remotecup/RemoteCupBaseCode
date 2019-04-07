@@ -277,8 +277,8 @@ class MainWindow:
 
     def show_message(self, message):
         print(message)
-        print(message.board)
-        self.ground.show_board(message.board)
+        print(message.world)
+        self.ground.show_board(message.world)
         self.results.update(message.score)
 
     def short_cut_key(self):
@@ -320,7 +320,6 @@ class Gui:
         self.showed_cycle = 0
         self.show_paused = False
         self.main_window = None
-        pass
 
     def start(self):
         print('{} start'.format(threading.current_thread().ident))
