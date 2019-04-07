@@ -1,11 +1,11 @@
 from Base.Monitor import *
 from Base.Math import *
-
+import Conf.conf as conf
 
 class Ground:
     def __init__(self, main, ground_config):
         self.main = main
-        self.ground = Frame(main.root, height=390, width=500, background='green4')
+        self.ground = Frame(main.root, height=conf.monitor_height - 110, width=conf.monitor_width, background='green4')
         self.ground.place(x=0, y=90)
         # self.ground.bind("<Motion>", self.show_mouse_position)
         self.ground_config = ground_config
@@ -15,9 +15,11 @@ class Ground:
         self.boards = {}
         for i in range(self.last_max_i):
             for j in range(self.last_max_j):
-                self.boards[(i, j)] = Frame(self.ground, width=500/self.last_max_j - 1, height=390/self.last_max_i - 1,
+                self.boards[(i, j)] = Frame(self.ground, width=conf.monitor_width/self.last_max_j - 1,
+                                            height=(conf.monitor_height - 110)/self.last_max_i - 1,
                                             bg='black')
-                self.boards[(i, j)].place(x=j*500/self.last_max_j, y=i*390/self.last_max_i)
+                self.boards[(i, j)].place(x=j*conf.monitor_width/self.last_max_j,
+                                          y=i*(conf.monitor_height - 110)/self.last_max_i)
                 self.boards[(i, j)].bind("<Motion>",
                                          lambda event, arg=(i, j): self.show_mouse_board(event, arg))
 
@@ -55,10 +57,11 @@ class Ground:
         self.boards.clear()
         for i in range(self.last_max_i):
             for j in range(self.last_max_j):
-                self.boards[(i, j)] = Frame(self.ground, width=500 / self.last_max_j - 1,
-                                            height=390 / self.last_max_i - 1,
+                self.boards[(i, j)] = Frame(self.ground, width=conf.monitor_width / self.last_max_j - 1,
+                                            height=(conf.monitor_height - 110) / self.last_max_i - 1,
                                             bg='black')
-                self.boards[(i, j)].place(x=j * 500 / self.last_max_j, y=i * 390 / self.last_max_i)
+                self.boards[(i, j)].place(x=j * conf.monitor_width / self.last_max_j,
+                                          y=i * (conf.monitor_height - 110) / self.last_max_i)
                 self.boards[(i, j)].bind("<Motion>",
                                          lambda event, arg=(i, j): self.show_mouse_board(event, arg))
 

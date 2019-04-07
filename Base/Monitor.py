@@ -129,7 +129,7 @@ class CMenu:
 class CResults:
     def __init__(self, main):
         self.main = main
-        self.results = Frame(main.root, height=40, width=500, background='gray60')
+        self.results = Frame(main.root, height=40, width=conf.monitor_width, background='gray60')
         self.results.place(x=0, y=0)
         self.team_results = []
         self.team_results.append(Label(self.results, text='First_team: 0', bg='gray60', fg=simple_color[1]))
@@ -153,7 +153,7 @@ class CResults:
 class CToolbar:
     def __init__(self, main):
         self.main = main
-        self.toolbar = Frame(main.root, height=50, width=500, background='gray40')
+        self.toolbar = Frame(main.root, height=50, width=conf.monitor_width, background='gray40')
         self.toolbar.place(x=0, y=40)
         self.make_timer()
         self.make_button()
@@ -244,8 +244,8 @@ class CToolbar:
 class CStatusBar:
     def __init__(self, main):
         self.main = main
-        self.status = Frame(main.root, height=20, width=500, background='gray66')
-        self.status.place(x=0, y=480)
+        self.status = Frame(main.root, height=20, width=conf.monitor_width, background='gray66')
+        self.status.place(x=0, y=conf.monitor_height - 20)
         self.mouse_position = {'x': 0, 'y': 0}
         self.mouse_label = Label(self.status, text=str(self.mouse_position), background='gray66')
         self.mouse_label.place(x=300, y=0)
@@ -265,7 +265,7 @@ class MainWindow:
         self.root.bind('<Right>', self.right_key)
         self.root.title('RemoteCup Monitor')
         self.root.tk.call('wm', 'iconphoto', self.root._w, PhotoImage(file='icons/icon.png'))
-        self.root.geometry('500x500')
+        self.root.geometry(str(conf.monitor_height) + 'x' + str(conf.monitor_width))
         self.root.pack_propagate(0)
 
         self.menu = CMenu(self)
