@@ -1,4 +1,6 @@
 simple_color = {0: 'black', 1: 'red', 2: 'blue', 3: 'orange', 4: 'pink', 'g': 'green', 'w': 'brown'}
+advance_color = {0: ['black'], 1: ['red', 'red4'], 2: ['blue', 'blue4'], 3: ['orange', 'dark goldenrod'],
+                 4: ['pink', 'pink4'], 'g': ['green'], 'w': ['brown']}
 
 
 class Vector2D:
@@ -7,6 +9,9 @@ class Vector2D:
         self.j = j
 
     def __str__(self):
+        return '(' + str(self.i) + ',' + str(self.j) + ')'
+
+    def __repr__(self):
         return '(' + str(self.i) + ',' + str(self.j) + ')'
 
     def __eq__(self, other):
