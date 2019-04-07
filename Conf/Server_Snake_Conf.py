@@ -1,7 +1,7 @@
 game_name       = 'Snake'
 agent_numbers   = 4
-max_i           = 15
-max_j           = 10
+max_i           = 30
+max_j           = 30
 max_cycle       = 1000
 ip              = "0.0.0.0"
 player_port     = 20002

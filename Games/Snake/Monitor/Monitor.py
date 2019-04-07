@@ -27,16 +27,22 @@ class Ground:
     def show_mouse_board(self, event, arg):
         self.main.statusbar.change_mouse_position(arg[0], arg[1])
 
-    def show_board(self, board):
+    def show_board(self, world):
         print(self.ground_config)
         for i in range(self.ground_config['max_i']):
             for j in range(self.ground_config['max_j']):
-                if board['board'][i][j] == -1:
+                if world['board'][i][j] == -1:
                     self.boards[(i, j)]['background'] = simple_color['w']
-                elif board['board'][i][j] > self.ground_config['team_number']:
+                elif world['board'][i][j] > self.ground_config['team_number']:
                     self.boards[(i, j)]['background'] = simple_color['g']
                 else:
-                    self.boards[(i, j)]['background'] = simple_color[board['board'][i][j]]
+                    if world['board'][i][j] is 0:
+                        self.boards[(i, j)]['background'] = simple_color[world['board'][i][j]]
+                    else:
+                        if (i, j) == world['heads'][world['board'][i][j]]:
+                            self.boards[(i, j)]['background'] = advance_color[world['board'][i][j]][1]
+                        else:
+                            self.boards[(i, j)]['background'] = simple_color[world['board'][i][j]]
 
     def reset(self, ground_config):
         self.ground_config = ground_config
