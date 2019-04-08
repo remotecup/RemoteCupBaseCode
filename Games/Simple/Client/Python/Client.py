@@ -5,6 +5,17 @@ from Base.Message import *
 from Games.Simple.Client.Python.World import *
 import Games.Simple.Client.Python.ClientGreedy as c_greedy
 import Games.Simple.Client.Python.ClientRandom as c_random
+import signal
+is_run = True
+
+
+def signal_handler(sig, frame):
+    global is_run
+    print('You pressed Ctrl+C!')
+    is_run = False
+
+
+signal.signal(signal.SIGINT, signal_handler)
 
 
 def run():
@@ -20,7 +31,7 @@ def run():
     world = World()
     message_snd = MessageClientConnectRequest(args.name).build()
 
-    while True:
+    while is_run:
         sock.sendto(message_snd, server_address)
         try:
             message_rcv = sock.recvfrom(4096)
@@ -32,7 +43,7 @@ def run():
             world.set_id(message.id, message.ground_config['goal_id'])
             break
 
-    while True:
+    while is_run:
         try:
             r = sock.recvfrom(4096)
         except:
