@@ -31,7 +31,6 @@ class Ground:
         self.main.statusbar.change_mouse_position(arg[0], arg[1])
 
     def show_board(self, world):
-        print(self.ground_config)
         for i in range(self.ground_config['max_i']):
             for j in range(self.ground_config['max_j']):
                 if world['board'][i][j] == -1:

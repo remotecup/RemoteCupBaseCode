@@ -207,10 +207,8 @@ class CToolbar:
         if self.scale_mouse_click:
             self.main.gui.showed_cycle = int(self.timer_scale.get())
             self.main.gui.pause()
-            print(self.timer_scale.get())
 
     def reset_time(self):
-        print('reset label')
         self.timer_scale.set(0)
         self.timer_min.set('0')
         self.timer_max.set('100')
@@ -260,8 +258,6 @@ class MainWindow:
         self.short_cut_key()
 
     def show_message(self, message):
-        print(message)
-        print(message.world)
         self.ground.show_board(message.world)
         self.results.update(message.score)
 
