@@ -144,6 +144,7 @@ class Server:
             self.check_monitor_connected()
             self.send_world()
             self.send_visual_to_monitors()
+            self.save_rcg_cycle()
             start_time_cycle = time.time()
 
             self.receive_action = 0

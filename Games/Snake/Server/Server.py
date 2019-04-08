@@ -128,6 +128,7 @@ class SnakeServer(Server):
         self.start_snake_body[4] = [Vector2D(Conf.max_i - 2, Conf.max_j - 4), Vector2D(Conf.max_i - 2, Conf.max_j - 3), Vector2D(Conf.max_i - 2, Conf.max_j - 2)]
         self.goal_id = 5
         self.goal_ate = False
+        self.last_cycle_ate = 0
 
     def update(self):
         logging.debug('Update Worlddddd')
@@ -153,6 +154,7 @@ class SnakeServer(Server):
                 self.agents[key].score += 1
                 self.world['board'][self.agents[key].next_head.i][self.agents[key].next_head.j] = self.agents[key].id
                 self.reset_game()
+                self.last_cycle_ate = self.cycle
             else:
                 logging.error('elseeeeeeee')
                 snake_accident = False
@@ -182,10 +184,9 @@ class SnakeServer(Server):
         for key in self.agents:
             self.world['heads'][self.agents[key].id] = (self.agents[key].head.i, self.agents[key].head.j)
         self.cycle += 1
-        if self.cycle % Conf.change_goal_pos == 0 and not self.goal_ate:
+        if (self.cycle - self.last_cycle_ate) % Conf.change_goal_pos == 0 and not self.goal_ate:
             self.goal_ate = False
             self.reset_game()
-        self.save_rcg_cycle()
 
     def make_world(self):
         logging.info('make new world')

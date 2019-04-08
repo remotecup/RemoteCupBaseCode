@@ -67,7 +67,6 @@ class SimpleServer(Server):
             self.agents[key].pos = self.agents[key].next_pos
             self.world[self.agents[key].next_pos.i][self.agents[key].next_pos.j] = self.agents[key].id
         self.cycle += 1
-        self.save_rcg_cycle()
 
     def make_world(self):
         logging.info('make new world')
