@@ -182,7 +182,7 @@ class SnakeServer(Server):
         for key in self.agents:
             self.world['heads'][self.agents[key].id] = (self.agents[key].head.i, self.agents[key].head.j)
         self.cycle += 1
-        if self.cycle % 20 == 0 and not self.goal_ate:
+        if self.cycle % Conf.change_goal_pos == 0 and not self.goal_ate:
             self.goal_ate = False
             self.reset_game()
         self.save_rcg_cycle()
@@ -287,7 +287,10 @@ class SnakeServer(Server):
             self.walls.append(wall)
             for w in wall.body:
                 self.wall_poses.append(w)
-                temp_positions.remove(w)
+                try:
+                    temp_positions.remove(w)
+                except:
+                    print(w)
             ok_wall_2_number += 1
 
         for w in self.wall_poses:
