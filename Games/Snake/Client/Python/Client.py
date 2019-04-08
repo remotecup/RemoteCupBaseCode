@@ -6,6 +6,7 @@ from Games.Snake.Client.Python.World import *
 import Games.Snake.Client.Python.ClientGreedy as c_greedy
 import Games.Snake.Client.Python.ClientRandom as c_random
 import Games.Snake.Client.Python.ClientBest as c_best
+import Games.Snake.Client.Python.YourClient as c_your
 import signal
 is_run = True
 
@@ -62,6 +63,8 @@ def run():
                 action = c_random.get_action(world)
             elif args.client_type == 'best':
                 action = c_best.get_action(world)
+            elif args.client_type == 'your':
+                action = c_your.get_action(world)
             elif args.client_type == 'hand':
                 action = input('enter action (u or d or l or r:')
 
