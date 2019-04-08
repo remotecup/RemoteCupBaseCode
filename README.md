@@ -16,7 +16,7 @@
 
 > .
 
-> python3 monitor.py or ./monitor.py
+> python3 monitor.py or ./monitor.py (if load speed of your monitor is slow, please remove "/usr/bin/ibus-daemon" why? I don't know)
 
 ## Simple Game
 > change game to 'Simple' in conf.py
