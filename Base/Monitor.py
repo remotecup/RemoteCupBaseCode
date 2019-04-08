@@ -5,6 +5,7 @@ import threading
 import time
 from tkinter import filedialog
 from tkinter import messagebox
+import signal
 import Conf.conf as conf
 if conf.game == 'Simple':
     import Conf.Monitor_Simple_Conf as Conf
@@ -23,10 +24,17 @@ teams_number = 2
 ground_config = None
 
 
+def signal_handler(sig, frame):
+    global is_run
+    is_run = False
+
+
+signal.signal(signal.SIGINT, signal_handler)
+
+
 def push_online():
     global is_connected
-    print('push online')
-    while is_connected:
+    while is_connected and is_run:
         try:
             r = sock.recvfrom(4096)
         except:
@@ -86,16 +94,11 @@ class CMenu:
         global is_connected, ground_config
         if is_connected:
             messagebox.showerror('connect error', 'please disconnect')
-            print('please disconnected')
             return
         self.main.gui.reset_show()
         is_connected = True
         visual_list.clear()
-        print('want connect')
-
-        # self.main.toolbar.reset_time()
         message_snd = MessageMonitorConnectRequest().build()
-        print('send req')
         sock.sendto(message_snd, server_address)
         try_number = 0
         while is_run:
@@ -107,12 +110,10 @@ class CMenu:
                     break
                 continue
             message_rcv = parse(r[0])
-            print(message_rcv)
             if message_rcv.type is 'MessageMonitorConnectResponse':
                 if ground_config != message_rcv.ground_config:
                     ground_config = message_rcv.ground_config
                     self.main.reset_ground()
-                print('receive resp')
                 th = threading.Thread(target=push_online)
                 th.start()
                 break
@@ -224,23 +225,6 @@ class CToolbar:
         self.online_button.place(x=300, y=18)
 
 
-# class CGround:
-#     def __init__(self, main):
-#         pass
-#
-#     def show_mouse_position(self, event):
-#         pass
-#
-#     def show_mouse_board(self, event, arg):
-#         pass
-#
-#     def show_board(self, board):
-#         pass
-#
-#     def reset(self):
-#         pass
-
-
 class CStatusBar:
     def __init__(self, main):
         self.main = main
@@ -291,11 +275,6 @@ class MainWindow:
         global is_run
         is_run = False
         time.sleep(1)
-        self.root.quit()
-        self.root.destroy()
-
-        print('{} close windows'.format(threading.current_thread().ident))
-        print('close')
 
     def right_key(self, event):
         self.gui.showed_cycle += 1
@@ -322,18 +301,13 @@ class Gui:
         self.main_window = None
 
     def start(self):
-        print('{} start'.format(threading.current_thread().ident))
         self.main_window = MainWindow(self)
         mainloop()
 
     def show(self):
-        print('{} show'.format(threading.current_thread().ident))
-        print('show start')
         while self.main_window is None and is_run:  # wait for start gui_thread
             time.sleep(1)
-        print('show started')
         while is_run:
-            print('{} {}'.format(self.showed_cycle, len(visual_list)))
             tmp = 0 if len(visual_list) == 0 else visual_list[0].cycle
             self.main_window.toolbar.timer_min.set(tmp)
             self.main_window.toolbar.timer_max.set(len(visual_list) + tmp)
@@ -347,7 +321,6 @@ class Gui:
                     self.main_window.toolbar.timer_scale.set(self.showed_cycle)
                     self.showed_cycle += 1
             time.sleep(Conf.show_time_speed)
-        print('show end')
 
     def play(self):
         self.show_paused = False
@@ -375,10 +348,9 @@ def run():
     gui = Gui()
     gui_thread = threading.Thread(target=gui.start)  # main loop
     gui_thread.start()
-    show_tread = threading.Thread(target=gui.show)  # show ground step by step
-    show_tread.start()
+    show_thread = threading.Thread(target=gui.show)  # show ground step by step
+    show_thread.start()
     while is_run:
         time.sleep(1)
-    # th.join()
-    # thshow.join()
-# run()
+    gui.main_window.root.quit()
+    show_thread.join()

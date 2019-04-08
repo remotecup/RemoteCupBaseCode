@@ -120,7 +120,7 @@ class Server:
 
         if Conf.auto_mode:
             self.start = True
-        while not self.start:
+        while not self.start and is_run:
             self.check_monitor_connected()
             time.sleep(0.1)
 
