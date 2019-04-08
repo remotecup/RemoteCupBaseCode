@@ -138,9 +138,9 @@ class CResults:
         self.team_results.append(Label(self.results, text='Second_team: 0', bg='gray60', fg=simple_color[2]))
         self.team_results[-1].place(x=200, y=0)
         self.team_results.append(Label(self.results, text='Third_team: 0', bg='gray60', fg=simple_color[3]))
-        self.team_results[-1].place(x=0, y=15)
+        self.team_results[-1].place(x=0, y=20)
         self.team_results.append(Label(self.results, text='Fourth_team: 0', bg='gray60', fg=simple_color[4]))
-        self.team_results[-1].place(x=200, y=15)
+        self.team_results[-1].place(x=200, y=20)
 
     def update(self, score):
         for i in range(4):
