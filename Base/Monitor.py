@@ -136,11 +136,11 @@ class CResults:
         self.team_results.append(Label(self.results, text='First_team: 0', bg='gray60', fg=simple_color[1]))
         self.team_results[-1].place(x=0, y=0)
         self.team_results.append(Label(self.results, text='Second_team: 0', bg='gray60', fg=simple_color[2]))
-        self.team_results[-1].place(x=150, y=0)
+        self.team_results[-1].place(x=200, y=0)
         self.team_results.append(Label(self.results, text='Third_team: 0', bg='gray60', fg=simple_color[3]))
         self.team_results[-1].place(x=0, y=15)
         self.team_results.append(Label(self.results, text='Fourth_team: 0', bg='gray60', fg=simple_color[4]))
-        self.team_results[-1].place(x=150, y=15)
+        self.team_results[-1].place(x=200, y=15)
 
     def update(self, score):
         for i in range(4):
@@ -230,11 +230,15 @@ class CStatusBar:
         self.status.place(x=0, y=conf.monitor_height - 20)
         self.mouse_position = {'x': 0, 'y': 0}
         self.mouse_label = Label(self.status, text=str(self.mouse_position), background='gray66')
-        self.mouse_label.place(x=300, y=0)
+        self.mouse_label.place(x=conf.monitor_width - 100, y=0)
 
     def change_mouse_position(self, x, y):
         self.mouse_position = {'x': x, 'y': y}
         self.mouse_label['text'] = '(x,y):({},{})'.format(self.mouse_position['x'], self.mouse_position['y'])
+
+    def change_mouse_position_ij(self, i, j):
+        self.mouse_position = {'i': i, 'j': j}
+        self.mouse_label['text'] = '(i,j):({},{})'.format(self.mouse_position['i'], self.mouse_position['j'])
 
 
 class MainWindow:

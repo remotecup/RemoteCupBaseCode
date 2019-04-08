@@ -28,7 +28,7 @@ class Ground:
         self.main.statusbar.change_mouse_position(event.x, event.y)
 
     def show_mouse_board(self, event, arg):
-        self.main.statusbar.change_mouse_position(arg[0], arg[1])
+        self.main.statusbar.change_mouse_position_ij(arg[0], arg[1])
 
     def show_board(self, world):
         for i in range(self.ground_config['max_i']):
