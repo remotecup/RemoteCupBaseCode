@@ -26,3 +26,8 @@ class Vector2D:
             return True
         return False
 
+    def dist(self, other):
+        return abs(self.i - other.i) + abs(self.j - other.j)
+
+    def __add__(self, other):
+        return Vector2D(self.i + other.i, self.j + other.j)
