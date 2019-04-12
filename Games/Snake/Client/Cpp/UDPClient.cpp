@@ -7,7 +7,7 @@
 #include <cstring>
 #include "Message.h"
 #include <algorithm>
-
+#include "World.h"
 using namespace std;
 
 int main() {
@@ -66,8 +66,10 @@ int main() {
         std::cout<<static_cast<MessageClientConnectResponse *>(Msg)->team_number<<std::endl;
         std::cout<<static_cast<MessageClientConnectResponse *>(Msg)->goal_id<<std::endl;
     }
-    std::cout<<newData<<std::endl;
-    //    close(thisSocket)
+
+    World * wm = new World();
+    wm->init_board(static_cast<MessageClientConnectResponse *>(Msg)->max_i, static_cast<MessageClientConnectResponse *>(Msg)->max_j);
+    wm->set_id(static_cast<MessageClientConnectResponse *>(Msg)->id, static_cast<MessageClientConnectResponse *>(Msg)->goal_id);
 
     while (true){
         char rcvb[8000];
@@ -82,19 +84,21 @@ int main() {
         rcvb[newData] = '\0';
         Message * Msg = pars(rcvb);
         if(Msg != nullptr){
+            if(Msg->e_type == MessageType::ClientDisconnect){
+                break;
+            }else if(Msg->e_type == MessageType::ClientWorld){
+                std::cout<<"is world"<<std::endl;
+                wm->update(static_cast<MessageClientWorld *>(Msg)->world_value);
+                wm->print();
+                string msg("{\"message_type\":\"MessageClientAction\" , \"value\": {\"action\": \"d\"}}");
+                char action[4096];
+                memcpy(action, msg.c_str(), msg.length());
+                send(thisSocket, action, msg.length(), 0);
+            }else{
+                continue;
+            }
             std::cout<<static_cast<MessageClientWorld *>(Msg)->score["nader"]<<std::endl;
-
         }
-
-
-
-        string msg("{\"message_type\":\"MessageClientAction\" , \"value\": {\"action\": \"d\"}}");
-        char action[4096];
-        memcpy(action, msg.c_str(), msg.length());
-
-        send(thisSocket, action, msg.length(), 0);
     }
-
-
     return 0;
 }

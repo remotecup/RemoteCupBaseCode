@@ -9,25 +9,22 @@
 
 using namespace std;
 using namespace rapidjson;
-class Vector2D{
-public:
-    int i;
-    int j;
 
-};
 
-class World{
-public:
-    int ** board;
-    Vector2D * head;
-    World(string world_msg){
 
-    }
+
+enum class MessageType{
+    None,
+    ClientConnectRequest,
+    ClientConnectResponse,
+    ClientWorld,
+    ClientDisconnect
 };
 
 class Message{
 public:
     string type;
+    MessageType e_type = MessageType::None;
 };
 
 class MessageClientConnectRequest : public Message{
@@ -35,6 +32,7 @@ public:
     string client_name;
     MessageClientConnectRequest(string name){
         type = string("ClientConnectRequest");
+        e_type = MessageType::ClientConnectRequest;
         client_name = name;
     }
     string build(){
@@ -71,6 +69,7 @@ public:
     int goal_id;
     MessageClientConnectResponse(int _id,int _max_i, int _max_j, int _team_number, int _goal_id){
         type = string("MessageClientConnectResponse");
+        e_type = MessageType::ClientConnectResponse;
         id = _id;
         max_i = _max_i;
         max_j = _max_j;
@@ -82,22 +81,16 @@ public:
         std::cout<<string(msg)<<std::endl;
         Document d;
         d.Parse(msg);
-        std::cout<<"hear0"<<std::endl;
-
         Value::MemberIterator M;
         for (M=d.MemberBegin(); M!=d.MemberEnd(); M++)
         {
             std::cout<<M->name.GetString()<<std::endl;
         }
-        std::cout<<"hear1"<<std::endl;
         string type = d["message_type"].GetString();
-        std::cout<<"hear1"<<std::endl;
         if (type.compare(string("MessageClientConnectResponse")) == 0){
-            std::cout<<"hear2"<<std::endl;
             Value & value = d["value"];
             int id = value["id"].GetInt();
             Value & ground_config = value["ground_config"];
-            std::cout<<"hear3"<<std::endl;
             int max_i = ground_config["max_i"].GetInt();
             int max_j = ground_config["max_j"].GetInt();
             int team_number = ground_config["team_number"].GetInt();
@@ -113,47 +106,53 @@ public:
     int cycle;
     map<string, int> score;
     vector<vector<int> > board;
-    MessageClientWorld(int _cycle, map<string, int> _score, vector<vector<int> > _board){
+    Value * world_value;
+
+    MessageClientWorld(int _cycle, map<string, int> _score, Value * _world){
         type = string("MessageClientWorld");
+        e_type = MessageType::ClientWorld;
         cycle = _cycle;
         score = _score;
-        board = _board;
+        world_value = _world;
     }
     static std::pair<bool, Message *> parse(char * msg){
         Document d;
         d.Parse(msg);
-        std::cout<<"h1"<<std::endl;
         string type = d["message_type"].GetString();
-        std::cout<<"h2"<<std::endl;
         if (type.compare(string("MessageClientWorld")) == 0){
-            std::cout<<"h3"<<std::endl;
             Value & value = d["value"];
             int cycle = value["cycle"].GetInt();
             Value & score_value = value["score"];
             Value::MemberIterator M;
             map<string, int> score;
-            std::cout<<"h4"<<std::endl;
             for (M=score_value.MemberBegin(); M!=score_value.MemberEnd(); M++)
             {
-                std::cout<<"h5"<<std::endl;
                 string team = M->name.GetString();
                 int sc = M->value.GetInt();
-                std::cout<<"h6"<<std::endl;
                 score.insert(make_pair(team, sc));
             }
-            std::cout<<"h7"<<std::endl;
-            Value & world_value = value["world"];
-            Value & board_value = world_value["board"];
-            vector<vector<int> > board;
-            for(auto& p : board_value.GetArray()){
-                vector<int> iboard;
-                for(auto& q : p.GetArray()){
-                    iboard.push_back(q.GetInt());
-                }
-                board.push_back(iboard);
-            }
-            Value & heads_value = world_value["heads"];
-            return std::make_pair(true, new MessageClientWorld(cycle, score, board));
+            Value * world = new Value(value["world"], d.GetAllocator());
+            return std::make_pair(true, new MessageClientWorld(cycle, score, world));
+        }
+        return std::make_pair(false, nullptr);
+    }
+};
+
+class MessageClientDisconnect : public Message{
+public:
+    int cycle;
+    map<string, int> score;
+    vector<vector<int> > board;
+    MessageClientDisconnect(){
+        type = string("MessageClientDisconnect");
+        e_type = MessageType::ClientDisconnect;
+    }
+    static std::pair<bool, Message *> parse(char * msg){
+        Document d;
+        d.Parse(msg);
+        string type = d["message_type"].GetString();
+        if (type.compare(string("MessageClientDisconnect")) == 0){
+            return std::make_pair(true, new MessageClientDisconnect());
         }
         return std::make_pair(false, nullptr);
     }
@@ -169,13 +168,17 @@ Message * pars(char * _msg){
     msg[str_msg.length()] = '\0';
     std::cout<<str_msg<<std::endl;
     std::pair<bool, Message *> ret;
-    std::cout<<"start res"<<std::endl;
     ret = MessageClientConnectResponse::parse(msg);
     if (std::get<0>(ret)){
         return std::get<1>(ret);
     }
     std::cout<<"start world"<<std::endl;
     ret = MessageClientWorld::parse(msg);
+    if (std::get<0>(ret)){
+        return std::get<1>(ret);
+    }
+    std::cout<<"start disc"<<std::endl;
+    ret = MessageClientDisconnect::parse(msg);
     if (std::get<0>(ret)){
         return std::get<1>(ret);
     }
