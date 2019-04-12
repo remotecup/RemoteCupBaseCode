@@ -1,17 +1,15 @@
+#include <rapidjson/writer.h>
+#include <algorithm>
+#include <iostream>
 #include <string>
-#include "rapidjson/document.h"
+#include <vector>
+#include <map>
 #include "rapidjson/filereadstream.h"
 #include "rapidjson/stringbuffer.h"
-#include <rapidjson/writer.h>
-#include <iostream>
-#include <algorithm>
-#include <map>
+#include "rapidjson/document.h"
 
 using namespace std;
 using namespace rapidjson;
-
-
-
 
 enum class MessageType{
     None,
@@ -93,7 +91,7 @@ public:
         return std::make_pair(false, nullptr);
     }
 };
-#include <vector>
+
 class MessageClientWorld : public Message{
 public:
     int cycle;
