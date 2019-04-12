@@ -5,6 +5,7 @@ class Snake:
         self.id = id
         self.head = None
         self.body = []
+        self.name = ''
 
     def get_body(self):
         return self.body
@@ -21,9 +22,10 @@ class Snake:
     def get_id(self):
         return self.id
 
-    def reset(self):
+    def reset(self, name):
         self.head = None
         self.body.clear()
+        self.name = name
 
 
 class World:
@@ -46,8 +48,10 @@ class World:
         self.board = message.world['board']
         self.cycle = message.cycle
         self.walls.clear()
+        n = 0
         for s in self.snakes:
-            self.snakes[s].reset()
+            self.snakes[s].reset(list(message.score.keys())[n])
+            n += 1
 
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
@@ -59,7 +63,7 @@ class World:
                     self.walls.append(Vector2D(i, j))
 
         for s in self.snakes:
-            self.snakes[s].set_head(Vector2D(message.world['heads'][s][0], message.world['heads'][s][1]))
+            self.snakes[s].set_head(Vector2D(message.world['heads'][self.snakes[s].name][0], message.world['heads'][self.snakes[s].name][1]))
 
     def get_self(self):
         return self.snakes[self.self_id]

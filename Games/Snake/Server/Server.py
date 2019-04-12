@@ -182,7 +182,7 @@ class SnakeServer(Server):
 
         self.world['heads'].clear()
         for key in self.agents:
-            self.world['heads'][self.agents[key].id] = (self.agents[key].head.i, self.agents[key].head.j)
+            self.world['heads'][self.agents[key].name] = [self.agents[key].head.i, self.agents[key].head.j]
         self.cycle += 1
         if (self.cycle - self.last_cycle_ate) % Conf.change_goal_pos == 0 and not self.goal_ate:
             self.goal_ate = False
@@ -304,7 +304,7 @@ class SnakeServer(Server):
 
         self.world['heads'].clear()
         for key in self.agents:
-            self.world['heads'][self.agents[key].id] = (self.agents[key].head.i, self.agents[key].head.j)
+            self.world['heads'][self.agents[key].name] = [self.agents[key].head.i, self.agents[key].head.j]
         self.print_world()
 
     def action_parse(self, msg):
