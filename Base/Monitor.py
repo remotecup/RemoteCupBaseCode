@@ -337,7 +337,8 @@ class Gui:
 
     def online(self):
         self.play()
-        self.showed_cycle = len(visual_list) - 1
+        if len(visual_list) is not 0:
+            self.showed_cycle = len(visual_list) - 1
 
     def reset_show(self):
         self.showed_cycle = 0
