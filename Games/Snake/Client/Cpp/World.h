@@ -1,3 +1,6 @@
+#ifndef WORLD
+#define WORLD
+
 #include "Math.h"
 #include <string>
 #include <vector>
@@ -16,7 +19,7 @@ public:
     Snake(int _id){
         id = _id;
     }
-    vector<Vector2D> get_body(){
+    vector<Vector2D>& get_body(){
         return body;
     }
     void add_body(Vector2D pos){
@@ -81,8 +84,9 @@ public:
         return walls;
     }
 
-    void update(Value * world_value){
+    void update(Value * world_value, int _cycle){
         walls->clear();
+        cycle = _cycle;
         Value & board_value = (*world_value)["board"];
         vector<vector<int> > _board;
         for(auto& p : board_value.GetArray()){
@@ -102,9 +106,13 @@ public:
             string team = M->name.GetString();
             snakes[s]->reset(team);
             Vector2D head;
+            int n = 0;
             for(auto& p : M->value.GetArray()){
-                head.i = p.GetInt();
-                head.j = p.GetInt();
+                if(n==0)
+                    head.i = p.GetInt();
+                else
+                    head.j = p.GetInt();
+                n += 1;
             }
             snakes[s]->set_head(head);
             s++;
@@ -119,13 +127,14 @@ public:
                 else if(board[i][j] > 0){
                     snakes[board[i][j]]->add_body(Vector2D(i, j));
                 }
-                else{
+                else if(board[i][j] == -1){
                     walls->push_back(Vector2D(i, j));
                 }
             }
         }
     }
     void print(){
+        cout<<"cycle:"<<cycle<<endl;
         for (int i = 0; i < max_i; i++){
             for (int j = 0; j < max_i; j++){
                 std::cout<<board[i][j]<<",";
@@ -148,5 +157,7 @@ public:
         for (auto& p : snakes[4]->get_body()){
             cout<<p<<",";
         }
+        cout<<endl;
     }
 };
+#endif

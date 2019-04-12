@@ -27,6 +27,15 @@ public:
         os << "("<<dt.i<<","<<dt.j<<")";
         return os;
     }
-
-
+    bool operator==(const Vector2D& dt){
+        if(i == dt.i && j == dt.j)
+            return true;
+        return false;
+    }
+    Vector2D operator+(const Vector2D& dt){
+        return Vector2D(i + dt.i, j + dt.j);
+    }
+    int dist(const Vector2D& dt){
+        return abs(i - dt.i) + abs(j - dt.j);
+    }
 };

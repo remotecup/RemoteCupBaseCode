@@ -3,4 +3,4 @@ cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
-add_executable("Client" "UDPClient.cpp" "Message.cpp" "Math.cpp" "World.cpp")
+add_executable("Client" "UDPClient.cpp" "Message.cpp" "Math.cpp" "World.cpp" "Decision.cpp")

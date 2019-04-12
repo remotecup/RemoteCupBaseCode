@@ -77,15 +77,8 @@ public:
         goal_id = _goal_id;
     }
     static std::pair<bool, Message *> parse(char * msg){
-        std::cout<<msg<<std::endl;
-        std::cout<<string(msg)<<std::endl;
         Document d;
         d.Parse(msg);
-        Value::MemberIterator M;
-        for (M=d.MemberBegin(); M!=d.MemberEnd(); M++)
-        {
-            std::cout<<M->name.GetString()<<std::endl;
-        }
         string type = d["message_type"].GetString();
         if (type.compare(string("MessageClientConnectResponse")) == 0){
             Value & value = d["value"];
@@ -166,18 +159,18 @@ Message * pars(char * _msg){
     char msg[8000];
     memcpy(msg, str_msg.c_str(), str_msg.length());
     msg[str_msg.length()] = '\0';
-    std::cout<<str_msg<<std::endl;
     std::pair<bool, Message *> ret;
+
     ret = MessageClientConnectResponse::parse(msg);
     if (std::get<0>(ret)){
         return std::get<1>(ret);
     }
-    std::cout<<"start world"<<std::endl;
+
     ret = MessageClientWorld::parse(msg);
     if (std::get<0>(ret)){
         return std::get<1>(ret);
     }
-    std::cout<<"start disc"<<std::endl;
+
     ret = MessageClientDisconnect::parse(msg);
     if (std::get<0>(ret)){
         return std::get<1>(ret);

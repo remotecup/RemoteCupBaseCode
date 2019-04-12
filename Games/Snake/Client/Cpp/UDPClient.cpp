@@ -8,6 +8,7 @@
 #include "Message.h"
 #include <algorithm>
 #include "World.h"
+#include "Decision.h"
 using namespace std;
 
 int main() {
@@ -51,20 +52,20 @@ int main() {
     ssize_t newData;
     size_t maxr = 4096;
     char rcvb[4096];
-    std::cout<<"rcvb"<<std::endl;
     newData = recvfrom(thisSocket, rcvb, 4096,
                        MSG_WAITALL, (struct sockaddr *) &destination,
                        &len);
-    std::cout<<string(rcvb)<<std::endl;
 
     Message * Msg = pars(rcvb);
     if(Msg != nullptr){
-        std::cout<<"msg is ok"<<std::endl;
-        std::cout<<static_cast<MessageClientConnectResponse *>(Msg)->id<<std::endl;
-        std::cout<<static_cast<MessageClientConnectResponse *>(Msg)->max_i<<std::endl;
-        std::cout<<static_cast<MessageClientConnectResponse *>(Msg)->max_j<<std::endl;
-        std::cout<<static_cast<MessageClientConnectResponse *>(Msg)->team_number<<std::endl;
-        std::cout<<static_cast<MessageClientConnectResponse *>(Msg)->goal_id<<std::endl;
+        std::cout<<"self_id:"<<static_cast<MessageClientConnectResponse *>(Msg)->id<<std::endl;
+        std::cout<<"max_i:"<<static_cast<MessageClientConnectResponse *>(Msg)->max_i<<std::endl;
+        std::cout<<"max_j:"<<static_cast<MessageClientConnectResponse *>(Msg)->max_j<<std::endl;
+        std::cout<<"team_number:"<<static_cast<MessageClientConnectResponse *>(Msg)->team_number<<std::endl;
+        std::cout<<"goal_id:"<<static_cast<MessageClientConnectResponse *>(Msg)->goal_id<<std::endl;
+    }else{
+        std::cout<<"received msg is not client connection"<<std::endl;
+        return 1;
     }
 
     World * wm = new World();
@@ -73,31 +74,27 @@ int main() {
 
     while (true){
         char rcvb[8000];
-        std::cout<<"rcvb"<<std::endl;
         socklen_t len;
         newData = recvfrom(thisSocket, rcvb, 8000,
                            MSG_WAITALL, (struct sockaddr *) &destination,
                            &len);
 
-        std::cout<<rcvb<<std::endl;
-        std::cout<<newData<<std::endl;
         rcvb[newData] = '\0';
         Message * Msg = pars(rcvb);
         if(Msg != nullptr){
             if(Msg->e_type == MessageType::ClientDisconnect){
                 break;
             }else if(Msg->e_type == MessageType::ClientWorld){
-                std::cout<<"is world"<<std::endl;
-                wm->update(static_cast<MessageClientWorld *>(Msg)->world_value);
+                wm->update(static_cast<MessageClientWorld *>(Msg)->world_value, static_cast<MessageClientWorld *>(Msg)->cycle);
                 wm->print();
-                string msg("{\"message_type\":\"MessageClientAction\" , \"value\": {\"action\": \"d\"}}");
+                string msg("{\"message_type\":\"MessageClientAction\" , \"value\": {\"action\": \""+get_action(wm)+"\"}}");
+                cout<<msg<<endl;
                 char action[4096];
                 memcpy(action, msg.c_str(), msg.length());
                 send(thisSocket, action, msg.length(), 0);
             }else{
                 continue;
             }
-            std::cout<<static_cast<MessageClientWorld *>(Msg)->score["nader"]<<std::endl;
         }
     }
     return 0;
