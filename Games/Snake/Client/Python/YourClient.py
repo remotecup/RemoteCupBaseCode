@@ -1,4 +1,4 @@
-from Games.Simple.Client.Python.World import *
+from Games.Snake.Client.Python.World import *
 import random
 
 

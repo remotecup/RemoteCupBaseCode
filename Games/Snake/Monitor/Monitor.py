@@ -41,7 +41,8 @@ class Ground:
                     if world['board'][i][j] is 0:
                         self.boards[(i, j)]['background'] = simple_color[world['board'][i][j]]
                     else:
-                        if (i, j) == world['heads'][world['board'][i][j]]:
+                        print(world)
+                        if [i, j] in world['heads'].values():
                             self.boards[(i, j)]['background'] = advance_color[world['board'][i][j]][1]
                         else:
                             self.boards[(i, j)]['background'] = simple_color[world['board'][i][j]]
