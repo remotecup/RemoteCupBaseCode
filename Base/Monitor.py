@@ -13,6 +13,9 @@ if conf.game == 'Simple':
 elif conf.game == 'Snake':
     import Conf.Monitor_Snake_Conf as Conf
     import Games.Snake.Monitor.Monitor as GameMonitor
+elif conf.game == 'Soccer':
+    import Conf.Monitor_Soccer_Conf as Conf
+    import Games.Soccer.Monitor.Monitor as GameMonitor
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.settimeout(1)

@@ -13,7 +13,8 @@ if conf.game == 'Simple':
     import Conf.Server_Simple_Conf as Conf
 elif conf.game == 'Snake':
     import Conf.Server_Snake_Conf as Conf
-
+elif conf.game == 'Soccer':
+    import Conf.Server_Soccer_Conf as Conf
 
 
 is_run = True

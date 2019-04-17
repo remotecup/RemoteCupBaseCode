@@ -1,6 +1,7 @@
 from Base.Server import *
 import Conf.Server_Soccer_Conf as Conf
 import random
+import json
 
 
 class PlayerAgent(Agent):
@@ -16,6 +17,7 @@ class PlayerAgent(Agent):
         self.acc = Vector2D(0, 0)
         self.pow = Vector2D(0, 0)
         self.pow_type = ""  # kick or move
+        self.last_action_cycle = 0
         self.kick_pow = Vector2D(0, 0)
 
     def update_next(self):
@@ -41,11 +43,11 @@ class Ball:
 
     def kicked(self, pow: Vector2D):
         self.vel = pow
-        self.vel.scale(self.max_vel / self.vel.r)
+        self.vel.scale(self.max_vel / self.vel.r())
 
 
 def action_to_dic(string_action):
-    return 
+    return json.loads(string_action)
 
 
 class SoccerServer(Server):
@@ -65,6 +67,7 @@ class SoccerServer(Server):
                 if self.agents[key].pos.dist(self.world['ball'].pos) > 0.5:
                     continue
                 self.world['ball'].kicked(self.agents[key].pow)
+        self.world['players'] = self.agents
         self.world['ball'].update_next()
         self.check_ball_pos()
 
@@ -82,6 +85,17 @@ class SoccerServer(Server):
             logging.error('message from invalid address, address: {}'.format(address))
             return False
         action = action_to_dic(message.string_action)
+        self.agents[address].pow_type = action['type']
+        self.agents[address].pow = action['pow']
+        if action is None:
+            action = {
+                'type': self.agents[address].pow_type,
+                'pow': self.agents[address].pow
+            }
+        if self.agents[address].last_action_cycle < self.cycle:
+            self.agents[address].last_action_cycle = self.cycle
+            self.receive_action += 1
+        return True
 
     def check_player_pos(self, agent):
         if agent.next_pos.i < 0 or agent.next_pos.i > self.dict_conf['max_i']:
