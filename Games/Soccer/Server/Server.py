@@ -32,7 +32,8 @@ class PlayerAgent(Agent):
 def max_r(r, p: Vector2D):
     if p.r() <= r:
         return p
-    return p.scale(r/p.r())
+    return p.scale(r / p.r())
+
 
 class Ball:
     def __init__(self, i, j):
