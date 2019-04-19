@@ -7,6 +7,8 @@ if conf.game == 'Simple':
     import Games.Simple.Client.Python.Client as Client
 elif conf.game == 'Snake':
     import Games.Snake.Client.Python.Client as Client
+elif conf.game == 'Soccer':
+    import Games.Soccer.Client.Python.Client as Client
 
 
 def main():

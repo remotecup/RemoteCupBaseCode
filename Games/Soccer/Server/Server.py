@@ -24,10 +24,15 @@ class PlayerAgent(Agent):
         if self.pow_type == "move":
             if self.pow.r() > 1:
                 self.pow.scale(1 / self.pow.r())
-            self.acc = max(self.max_acc, self.acc + self.pow.scale(0.25))
-        self.vel += max(self.max_vel, self.vel + self.acc - self.vel.scale(self.decay))
+            self.acc = max_r(self.max_acc, self.acc + self.pow.scale(0.25))
+        self.vel += max_r(self.max_vel, self.vel + self.acc - self.vel.scale(self.decay))
         self.next_pos += self.vel
 
+
+def max_r(r, p: Vector2D):
+    if p.r() <= r:
+        return p
+    return p.scale(r/p.r())
 
 class Ball:
     def __init__(self, i, j):
@@ -47,7 +52,7 @@ class Ball:
 
 
 def action_to_dic(string_action):
-    return json.loads(string_action)
+    return string_action
 
 
 class SoccerServer(Server):
@@ -56,6 +61,7 @@ class SoccerServer(Server):
         self.null_agent = PlayerAgent()
         self.dict_conf = {'max_i': Conf.max_i, 'max_j': Conf.max_j,
                           'team_number': Conf.team_number}
+        self.ball = None
         self.world = {'players': {}, 'ball': None}
 
     def update(self):
@@ -64,15 +70,21 @@ class SoccerServer(Server):
             self.check_player_pos(self.agents[key])
             self.agents[key].pos = self.agents[key].next_pos
             if self.agents[key].pow_type == "kick":
-                if self.agents[key].pos.dist(self.world['ball'].pos) > 0.5:
+                if self.agents[key].pos.dist(self.ball.pos) > 0.5:
                     continue
-                self.world['ball'].kicked(self.agents[key].pow)
-        self.world['players'] = self.agents
-        self.world['ball'].update_next()
+                self.ball.kicked(self.agents[key].pow)
+        self.ball.update_next()
         self.check_ball_pos()
+        self.update_world()
+
+    def update_world(self):
+        self.world = {'players': {}, 'ball': None}
+        for key in self.agents:
+            self.world['players'][key] = self.agents[key].__dict__
+        self.world['ball'] = self.ball.__dict__
 
     def make_world(self):
-        self.world['ball'] = Ball(Conf.max_i / 2, Conf.max_j / 2)
+        self.ball = Ball(Conf.max_i / 2, Conf.max_j / 2)
 
     def action_parse(self, msg):
         message = parse(msg[0])
@@ -86,7 +98,9 @@ class SoccerServer(Server):
             return False
         action = action_to_dic(message.string_action)
         self.agents[address].pow_type = action['type']
-        self.agents[address].pow = action['pow']
+        self.agents[address].pow = Vector2D(action['pow'][0], action['pow'][1])
+        print("####################")
+        print("pow:", self.agents[address].pow, "###", self.agents[address].pow.i, self.agents[address].pow.j)
         if action is None:
             action = {
                 'type': self.agents[address].pow_type,
@@ -108,21 +122,21 @@ class SoccerServer(Server):
             agent.acc = Vector2D(agent.acc.i, 0)
 
     def check_ball_pos(self):
-        if self.world['ball'].next_pos.i < 0:
-            self.world['ball'].next_pos.i *= -1
-            self.world['ball'].vel.i *= -1
-            self.world['ball'].acc.i *= -1
-        if self.world['ball'].next_pos.i > Conf.max_i:
-            diff = self.world['ball'].next_pos.i - Conf.max_i
-            self.world['ball'].next_pos.i = Conf.max_i - diff
-            self.world['ball'].vel.i *= -1
-            self.world['ball'].acc.i *= -1
-        if self.world['ball'].next_pos.j < 0:
-            self.world['ball'].next_pos.j *= -1
-            self.world['ball'].vel.j *= -1
-            self.world['ball'].acc.j *= -1
-        if self.world['ball'].next_pos.j > Conf.max_j:
-            diff = self.world['ball'].next_pos.j - Conf.max_j
-            self.world['ball'].next_pos.j = Conf.max_j - diff
-            self.world['ball'].vel.j *= -1
-            self.world['ball'].acc.j *= -1
+        if self.ball.next_pos.i < 0:
+            self.ball.next_pos.i *= -1
+            self.ball.vel.i *= -1
+            self.ball.acc.i *= -1
+        if self.ball.next_pos.i > Conf.max_i:
+            diff = self.ball.next_pos.i - Conf.max_i
+            self.ball.next_pos.i = Conf.max_i - diff
+            self.ball.vel.i *= -1
+            self.ball.acc.i *= -1
+        if self.ball.next_pos.j < 0:
+            self.ball.next_pos.j *= -1
+            self.ball.vel.j *= -1
+            self.ball.acc.j *= -1
+        if self.ball.next_pos.j > Conf.max_j:
+            diff = self.ball.next_pos.j - Conf.max_j
+            self.ball.next_pos.j = Conf.max_j - diff
+            self.ball.vel.j *= -1
+            self.ball.acc.j *= -1

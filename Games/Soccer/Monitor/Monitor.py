@@ -4,6 +4,7 @@ from Base.Monitor import *
 from Base.Math import *
 from tkinter import *
 import Conf.conf as conf
+from Games.Soccer.Server.Server import PlayerAgent, Ball
 
 
 class Ground:
@@ -23,5 +24,10 @@ class Ground:
         self.main.statusbar.change_mouse_position_ij(arg[0], arg[1])
 
     def show_board(self, world):
-        for agent in world['players']:
-            self.ground.create_line(agent.pos.i, agent.pos.j, agent.pos.i + 10, agent.pos.j)
+        for key in world['players']:
+            agent = PlayerAgent()
+            agent.__dict__ = world['players'][key]
+            self.ground.create_line(agent.pos[0], agent.pos[1], agent.pos[0]+ 10, agent.pos[1])
+
+    def reset(self, ground_config):
+        self.ground_config = ground_config

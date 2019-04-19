@@ -37,6 +37,10 @@ class Vector2D:
     def __add__(self, other):
         return Vector2D(self.i + other.i, self.j + other.j)
 
+    def __sub__(self, other):
+        tmp = Vector2D(-other.i, -other.j)
+        return self + tmp
+
     @staticmethod
     def polar2vector(r, teta):
         return Vector2D(r * cos(teta), r * sin(teta))
@@ -44,3 +48,4 @@ class Vector2D:
     def scale(self, k):
         self.i *= k
         self.j *= k
+        return self
