@@ -46,6 +46,4 @@ class Vector2D:
         return Vector2D(r * cos(teta), r * sin(teta))
 
     def scale(self, k):
-        self.i *= k
-        self.j *= k
-        return self
+        return Vector2D(self.i*k, self.j*k)

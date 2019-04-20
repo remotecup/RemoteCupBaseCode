@@ -56,11 +56,11 @@ class Ground:
         for key in world['players']:
             agent = PlayerAgent()
             agent.__dict__ = world['players'][key]
-            self.draw_object(agent, 5, "yellow")
+            self.draw_object(agent, Server_conf.kick_able_r, "yellow")
         if world['ball'] is not None:
             ball = Ball(0, 0)
             ball.__dict__ = world['ball']
-            self.draw_object(ball, 2, "white")
+            self.draw_object(ball, S_conf.ball_r, "white")
 
     def remove_objects(self):
         while self.objects:

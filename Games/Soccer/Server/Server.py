@@ -10,9 +10,9 @@ class PlayerAgent(Agent):
         self.pos = Vector2D(0, 0)
         self.next_pos = Vector2D(0, 0)
         self.team_id = 0
-        self.max_acc = 0.25
-        self.max_vel = 1
-        self.decay = 0.1
+        self.max_acc = Conf.player_max_acc
+        self.max_vel = Conf.player_max_vel
+        self.decay = Conf.player_decay
         self.vel = Vector2D(0, 0)
         self.acc = Vector2D(0, 0)
         self.pow = Vector2D(0, 0)
@@ -23,9 +23,9 @@ class PlayerAgent(Agent):
     def update_next(self):
         if self.pow_type == "move":
             if self.pow.r() > 1:
-                self.pow.scale(1 / self.pow.r())
+                self.pow = self.pow.scale(1 / self.pow.r())
             self.acc = max_r(self.max_acc, self.acc + self.pow.scale(0.25))
-        self.vel += max_r(self.max_vel, self.vel + self.acc - self.vel.scale(self.decay))
+        self.vel = max_r(self.max_vel, self.vel + self.acc - self.vel.scale(self.decay))
         self.next_pos += self.vel
 
 
@@ -40,16 +40,15 @@ class Ball:
         self.pos = Vector2D(i, j)
         self.next_pos = Vector2D(0, 0)
         self.vel = Vector2D(0, 0)
-        self.max_vel = 3
-        self.decay = 0.94
+        self.max_vel = Conf.ball_max_vel
+        self.decay = Conf.ball_decay
 
     def update_next(self):
-        self.vel.scale(0.94)
+        self.vel = self.vel.scale(self.decay)
         self.next_pos = self.pos + self.vel
 
     def kicked(self, pow: Vector2D):
-        self.vel = pow
-        self.vel.scale(self.max_vel / self.vel.r())
+        self.vel = pow.scale(self.max_vel / pow.r())
 
 
 def action_to_dic(string_action):
@@ -66,17 +65,25 @@ class SoccerServer(Server):
         self.world = {'players': {}, 'ball': None}
 
     def update(self):
+        if(check_goal()):
+            # add Score
+            self.make_world()
+
         for key in self.agents:
             self.agents[key].update_next()
             self.check_player_pos(self.agents[key])
             self.agents[key].pos = self.agents[key].next_pos
             if self.agents[key].pow_type == "kick":
-                if self.agents[key].pos.dist(self.ball.pos) > 0.5:
+                if self.agents[key].pos.dist(self.ball.pos) > Conf.kick_able_r:
                     continue
                 self.ball.kicked(self.agents[key].pow)
         self.ball.update_next()
         self.check_ball_pos()
+        self.ball.pos = self.ball.next_pos
         self.update_world()
+
+    def check_goal(self):
+        pass
 
     def update_world(self):
         self.world = {'players': {}, 'ball': None}
@@ -86,6 +93,31 @@ class SoccerServer(Server):
 
     def make_world(self):
         self.ball = Ball(Conf.max_i / 2, Conf.max_j / 2)
+        i = 1
+        changed = False
+        id = 1
+        for key in self.agents:
+            if i > len(self.agents) / 2 and not changed:
+                id += 1
+                changed = True
+            self.agents[key].team_id = id
+            i += 1
+        left_team_pos = Vector2D(Conf.max_i / 4, Conf.max_j / Conf.agent_numbers)
+        right_team_pos = Vector2D(Conf.max_i * 3 / 4, Conf.max_j / Conf.agent_numbers)
+        for key in self.agents:
+            if self.agents[key].team_id == 1:
+                self.agents[key].pos = left_team_pos
+                self.agents[key].next_pos = left_team_pos
+                left_team_pos += Vector2D(0, Conf.max_j / Conf.agent_numbers * 2)
+            elif self.agents[key].team_id == 2:
+                self.agents[key].pos = right_team_pos
+                self.agents[key].next_pos = right_team_pos
+                right_team_pos += Vector2D(0, Conf.max_j / Conf.agent_numbers * 2)
+        for key in self.agents:
+            self.ball.pos = self.agents[key].pos
+            self.ball.next_pos = self.agents[key].pos
+            break
+        self.update_world()
 
     def action_parse(self, msg):
         message = parse(msg[0])
@@ -100,8 +132,6 @@ class SoccerServer(Server):
         action = action_to_dic(message.string_action)
         self.agents[address].pow_type = action['type']
         self.agents[address].pow = Vector2D(action['pow'][0], action['pow'][1])
-        print("####################")
-        print("pow:", self.agents[address].pow, "###", self.agents[address].pow.i, self.agents[address].pow.j)
         if action is None:
             action = {
                 'type': self.agents[address].pow_type,
@@ -126,18 +156,18 @@ class SoccerServer(Server):
         if self.ball.next_pos.i < 0:
             self.ball.next_pos.i *= -1
             self.ball.vel.i *= -1
-            self.ball.acc.i *= -1
+            # self.ball.acc.i *= -1
         if self.ball.next_pos.i > Conf.max_i:
             diff = self.ball.next_pos.i - Conf.max_i
             self.ball.next_pos.i = Conf.max_i - diff
             self.ball.vel.i *= -1
-            self.ball.acc.i *= -1
+            # self.ball.acc.i *= -1
         if self.ball.next_pos.j < 0:
             self.ball.next_pos.j *= -1
             self.ball.vel.j *= -1
-            self.ball.acc.j *= -1
+            # self.ball.acc.j *= -1
         if self.ball.next_pos.j > Conf.max_j:
             diff = self.ball.next_pos.j - Conf.max_j
             self.ball.next_pos.j = Conf.max_j - diff
             self.ball.vel.j *= -1
-            self.ball.acc.j *= -1
+            # self.ball.acc.j *= -1

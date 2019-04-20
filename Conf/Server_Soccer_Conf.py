@@ -1,10 +1,16 @@
 game_name       = 'Soccer'
-agent_numbers   = 2
+agent_numbers   = 4
 team_number     = 2
 max_i           = 500
 max_j           = 300
 goal_height     = 100
 max_cycle       = 1000
+kick_able_r     = 10
+ball_decay      = 0.94
+ball_max_vel    = 30
+player_decay    = 0.8
+player_max_vel  = 5
+player_max_acc  = 1
 ip              = "0.0.0.0"
 player_port     = 20002
 monitor_port    = 20003
