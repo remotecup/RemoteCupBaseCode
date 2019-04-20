@@ -1,8 +1,9 @@
 game_name       = 'Soccer'
 agent_numbers   = 2
 team_number     = 2
-max_i           = 300
+max_i           = 500
 max_j           = 300
+goal_height     = 100
 max_cycle       = 1000
 ip              = "0.0.0.0"
 player_port     = 20002
