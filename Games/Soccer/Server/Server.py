@@ -48,6 +48,8 @@ class Ball:
         self.next_pos = self.pos + self.vel
 
     def kicked(self, pow: Vector2D):
+        if pow.r() > 1:
+            pow = pow.scale(1 / pow.r())
         self.vel = pow.scale(self.max_vel / pow.r())
 
 
@@ -65,9 +67,6 @@ class SoccerServer(Server):
         self.world = {'players': {}, 'ball': None}
 
     def update(self):
-        if(check_goal()):
-            # add Score
-            self.make_world()
 
         for key in self.agents:
             self.agents[key].update_next()
@@ -78,12 +77,30 @@ class SoccerServer(Server):
                     continue
                 self.ball.kicked(self.agents[key].pow)
         self.ball.update_next()
+        if self.check_goal():
+            self.make_world()
         self.check_ball_pos()
         self.ball.pos = self.ball.next_pos
         self.update_world()
 
     def check_goal(self):
-        pass
+        ball_line = Line2D(self.ball.pos, self.ball.next_pos)
+        point = ball_line.x(0)
+        if Conf.max_j / 2 - Conf.goal_height / 2 < point.j < Conf.max_j / 2 + Conf.goal_height / 2:
+            if self.ball.next_pos.i < 0:
+                for key in self.agents:
+                    if self.agents[key].team_id == 1:
+                        self.agents[key].score += 1
+                return True
+        point = ball_line.x(Conf.max_i)
+        if Conf.max_j / 2 - Conf.goal_height / 2 < point.j < Conf.max_j / 2 + Conf.goal_height / 2:
+            if self.ball.next_pos.i > Conf.max_i:
+                for key in self.agents:
+                    if self.agents[key].team_id == 2:
+                        self.agents[key].score += 1
+                return True
+
+        return False
 
     def update_world(self):
         self.world = {'players': {}, 'ball': None}

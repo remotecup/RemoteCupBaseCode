@@ -46,4 +46,19 @@ class Vector2D:
         return Vector2D(r * cos(teta), r * sin(teta))
 
     def scale(self, k):
-        return Vector2D(self.i*k, self.j*k)
+        return Vector2D(self.i * k, self.j * k)
+
+
+class Line2D:
+    def __init__(self, pos1: Vector2D, pos2: Vector2D):
+        self.m = (pos2.j - pos1.j) / (pos2.i - pos1.i)
+        self.b = pos2.j - self.m * pos2.i
+
+    def x(self, x):
+        return Vector2D(x, self.m * x + self.b)
+
+    def contain(self, pos: Vector2D):
+        y = self.m * pos.i + self.b
+        if y == pos.j:
+            return True
+        return False
