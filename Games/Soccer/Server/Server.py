@@ -84,6 +84,8 @@ class SoccerServer(Server):
         self.update_world()
 
     def check_goal(self):
+        if self.ball.pos.i - self.ball.next_pos.i == 0:
+            return False
         ball_line = Line2D(self.ball.pos, self.ball.next_pos)
         point = ball_line.x(0)
         if Conf.max_j / 2 - Conf.goal_height / 2 < point.j < Conf.max_j / 2 + Conf.goal_height / 2:

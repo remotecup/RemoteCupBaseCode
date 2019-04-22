@@ -1,5 +1,5 @@
 game_name       = 'Soccer'
-agent_numbers   = 1
+agent_numbers   = 4
 team_number     = 2
 max_i           = 500
 max_j           = 300
