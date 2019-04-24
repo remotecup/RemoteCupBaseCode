@@ -2,7 +2,7 @@ import socket
 import random
 from argparse import ArgumentParser
 from Base.Message import *
-# from Games.Soccer.Client.Python.World import *
+from Games.Soccer.Client.Python.World import *
 import Games.Soccer.Client.Python.SampleClient as sample
 import signal
 is_run = True
@@ -27,7 +27,7 @@ def run():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(1)
     server_address = ('localhost', 20002)
-    # world = World()
+    world = World()
     message_snd = MessageClientConnectRequest(args.name).build()
 
     while is_run:
@@ -39,7 +39,7 @@ def run():
         message = parse(message_rcv[0])
         if message.type == 'MessageClientConnectResponse':
             print('my id is ' + str(message.id))
-            # world.set_id(message.id, message.ground_config['goal_id'])
+            world.set_id(message.id, message.ground_config['goal_id'])
             break
 
     while is_run:
@@ -56,6 +56,7 @@ def run():
 
             # if True or args.client_type == 'greedy' or (args.client_type == 'auto' and world.self_id == 1):
             action = sample.get_action(message.world)
+            check_action_side(actoin,)
 
             sock.sendto(MessageClientAction(string_action=action).build(), server_address)
 
