@@ -29,8 +29,8 @@ class Object:
         return obj_pos
 
     def set_data(self, data: dict):
-        self.M_pos = data['pos']
-        self.M_vel = data['vel']
+        self.M_pos = Vector2D(data['pos'][0], data['pos'][1])
+        self.M_vel = Vector2D(data['vel'][0], data['vel'][1])
         self.M_decay = data['decay']
         self.more_data(data)
 
@@ -47,7 +47,7 @@ class Agent(Object):
     def __init__(self):
         super().__init__()
         self.team_id: int = None
-        self.kickable_r
+        self.kickable_r = 0
 
     def more_data(self, data: dict):
         self.team_id = data['team_id']
@@ -66,7 +66,7 @@ class World:
 
     def set_id2(self, agents):
         i = 0
-        for _, agent in agents.item():
+        for _, agent in agents.items():
             if agent['id'] == self.self_id:
                 self.self_id = i
                 break
@@ -79,10 +79,15 @@ class World:
         for key in agents_dict:
             agent = Agent()
             agent.set_data(agents_dict[key])
+            self.M_agents.append(agent)
         self.set_id2(agents_dict)
 
         self.M_ball = Ball()
         self.M_ball.set_data(msg.world['ball'])
+
+    def clear(self):
+        while self.M_agents:
+            self.M_agents.pop()
 
     def self(self) -> Agent:
         return self.M_agents[self.self_id]

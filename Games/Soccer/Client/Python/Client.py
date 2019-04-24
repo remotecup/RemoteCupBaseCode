@@ -52,10 +52,11 @@ def run():
             break
         elif message.type == 'MessageClientWorld':
             world.update(message)
-            world.print()
+            # world.print()
 
-            action = main.get_action()
-            check_action_side(actoin,)
+            action = main.get_action(world)
+            # check_action_side(actoin,)
 
             sock.sendto(MessageClientAction(string_action=action).build(), server_address)
+            world.clear()
 
