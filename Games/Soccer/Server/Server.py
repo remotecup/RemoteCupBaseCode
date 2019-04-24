@@ -19,6 +19,7 @@ class PlayerAgent(Agent):
         self.pow_type = ""  # kick or move
         self.last_action_cycle = 0
         self.kick_pow = Vector2D(0, 0)
+        self.kickable_r = Conf.kick_able_r
 
     def update_next(self):
         if self.pow_type == "move":
@@ -73,7 +74,7 @@ class SoccerServer(Server):
             self.check_player_pos(self.agents[key])
             self.agents[key].pos = self.agents[key].next_pos
             if self.agents[key].pow_type == "kick":
-                if self.agents[key].pos.dist(self.ball.pos) > Conf.kick_able_r:
+                if self.agents[key].pos.dist(self.ball.pos) > self.agents[key].kickable_r:
                     continue
                 self.ball.kicked(self.agents[key].pow)
         self.ball.update_next()
